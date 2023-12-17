@@ -3,7 +3,6 @@ package com.financeprojectboard.app.service;
 import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -59,8 +58,12 @@ public class UserService {
     }
 
 
-    public User getUser(User user) {
+    public Object getUser(User user) {
+        if(user.getPassword().equals(userRepository.findByEmail(user.getEmail()).getPassword())){
+            return userRepository.findByEmail(user.getEmail());
+        }else {
+            return "false";
+        }
 
-        return userRepository.findByEmail(user.getEmail());
     }
 }

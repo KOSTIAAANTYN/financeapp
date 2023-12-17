@@ -10,21 +10,25 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin("*")
 public class UserController {
     private final UserService userService;
+    //<<пароль+email
+    //email-code(front)
+    //сохран изм пароля
 
     @PostMapping("/sendEmail")
     public String sendEmail(@RequestBody User user) {
         //return bool or code
         if (userService.isExist(user)) {
-            return "isExsist";
+            return "isExist";
         } else {
             return userService.emailAuth(user);
         }
     }
 
+    //берет дание с пред запраса
     @PostMapping("/createUser")
     public String createUser(@RequestBody User user) {
+        //save user
         userService.saveUser(user);
-        System.out.println(user);
         return "All good";
     }
 
@@ -34,8 +38,10 @@ public class UserController {
         //return message or find user
         if (userService.isExist(user)) {
             return userService.getUser(user);
-        } else {
-            return "User isn't exist";
+        } else if (user.getPassword().equals("")){
+            return "false";
+        }else {
+            return "false";
         }
     }
 
