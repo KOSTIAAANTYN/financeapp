@@ -3,6 +3,7 @@ package com.financeprojectboard.app.service;
 import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -16,8 +17,25 @@ public class UserService {
     private final JavaMailSender mailSender;
 
 
-    public void saveUser(User user) {
-        userRepository.save(user);
+    public String saveUser(User user) {
+        if (isExist(user)){
+            return "User exist";
+        }else{
+            userRepository.save(user);
+            return "User saved";
+        }
+    }
+
+    public String savePass(User user) {
+        if (isExist(user)){
+            User oldUser = userRepository.findByEmail(user.getEmail());
+            oldUser.setPassword(user.getPassword());
+            userRepository.save(oldUser);
+            return "Password saved";
+        }else {
+            return "User doesn't exist";
+        }
+
     }
 
 
@@ -59,11 +77,12 @@ public class UserService {
 
 
     public Object getUser(User user) {
-        if(user.getPassword().equals(userRepository.findByEmail(user.getEmail()).getPassword())){
+        if (user.getPassword().equals(userRepository.findByEmail(user.getEmail()).getPassword())) {
             return userRepository.findByEmail(user.getEmail());
-        }else {
-            return "false";
+        } else {
+            return ResponseEntity.badRequest().body("wrong pass");
         }
 
     }
+
 }

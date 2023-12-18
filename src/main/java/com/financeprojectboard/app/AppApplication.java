@@ -1,5 +1,8 @@
 package com.financeprojectboard.app;
 
+import com.financeprojectboard.app.model.User;
+import com.financeprojectboard.app.repositories.UserRepository;
+import com.financeprojectboard.app.service.UserService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
