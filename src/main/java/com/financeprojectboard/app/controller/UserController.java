@@ -5,7 +5,6 @@ import com.financeprojectboard.app.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequiredArgsConstructor

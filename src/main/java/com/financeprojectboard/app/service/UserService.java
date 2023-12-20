@@ -2,12 +2,17 @@ package com.financeprojectboard.app.service;
 
 import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.repositories.UserRepository;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
 @Service
@@ -46,17 +51,34 @@ public class UserService {
 
     public String emailAuth(User user) {
         String code = generateRandomCode();
+        MimeMessage message = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
 
-        SimpleMailMessage message = new SimpleMailMessage();
+            helper.setFrom("financeprojectboard@gmail.com");
+            helper.setTo(user.getEmail());
+            helper.setSubject("Your code for finance app");
 
-        message.setFrom("financeprojectboard@gmail.com");
-        message.setTo(user.getEmail());
-        message.setText(code);
-        message.setSubject("Your code for finance app");
 
-        mailSender.send(message);
+            ClassPathResource resource = new ClassPathResource("templates/codeMail.html");
+            byte[] fileData = resource.getInputStream().readAllBytes();
+            String htmlContent = new String(fileData, StandardCharsets.UTF_8);
+
+            htmlContent = htmlContent.replace("<!-- GENERATED_CODE_PLACEHOLDER -->", code);
+
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+
+
+        } catch (MessagingException | IOException e) {
+            System.err.println("Failed to send email: " + e.getMessage());
+        }
+
         return code;
     }
+
 
 
     public static String generateRandomCode() {
