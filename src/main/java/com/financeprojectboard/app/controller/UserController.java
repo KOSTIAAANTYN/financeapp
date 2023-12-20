@@ -19,7 +19,7 @@ public class UserController {
     public ResponseEntity<String> sendEmail(@RequestBody User user) {
         //return message or mail code
         if (userService.isExist(user)) {
-            return ResponseEntity.badRequest().body("isExist");
+            return ResponseEntity.status(204).body("isExist");
         } else {
             userHere = user;
             return ResponseEntity.ok(userService.emailAuth(user));
@@ -39,12 +39,9 @@ public class UserController {
     public Object login(@RequestBody User user) {
         //return message or find user
         if (userService.isExist(user)) {
-            if (user.getPassword().equals("")) {
-                return ResponseEntity.badRequest().body("empty pass");
-            }
-            return ResponseEntity.ok(userService.getUser(user));
+            return userService.getUser(user);
         } else {
-            return ResponseEntity.badRequest();
+            return ResponseEntity.status(404).body("user");
         }
     }
 
@@ -56,7 +53,7 @@ public class UserController {
             userHere = user;
             return ResponseEntity.ok(userService.emailAuth(user));
         } else {
-            return ResponseEntity.badRequest().body("User doesn't exist");
+            return ResponseEntity.status(404).body("User doesn't exist");
         }
 
     }

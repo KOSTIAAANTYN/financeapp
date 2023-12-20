@@ -78,9 +78,9 @@ public class UserService {
 
     public Object getUser(User user) {
         if (user.getPassword().equals(userRepository.findByEmail(user.getEmail()).getPassword())) {
-            return userRepository.findByEmail(user.getEmail());
+            return ResponseEntity.ok(userRepository.findByEmail(user.getEmail()));
         } else {
-            return ResponseEntity.badRequest().body("wrong pass");
+            return ResponseEntity.status(404).body("user");
         }
 
     }
