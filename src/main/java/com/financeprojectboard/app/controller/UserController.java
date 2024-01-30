@@ -2,9 +2,12 @@ package com.financeprojectboard.app.controller;
 
 import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.service.UserService;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -56,10 +59,37 @@ public class UserController {
         }
 
     }
+
     //saved changed pass
     @PostMapping("/savePassword")
     public ResponseEntity<String> savePassword() {
         return ResponseEntity.ok(userService.savePass(userHere));
+    }
+
+    //200ok 400bad
+    @PostMapping("/changeName")
+    public ResponseEntity<String> changeName(@RequestBody User user) {
+        if (userService.changeName(user.getId(), user.getUsername())) {
+            return ResponseEntity.ok().body("ok");
+        } else {
+            return ResponseEntity.status(400).body("bad");
+        }
+    }
+
+    @PostMapping("/deleteAccount")
+    public ResponseEntity<String> deleteAccount(@RequestBody User user) {
+        if (userService.delUser(user.getId())) {
+            return ResponseEntity.ok().body("User deleted");
+        } else return ResponseEntity.status(400).body("bad");
+    }
+
+    @PostMapping("/contact")
+    public ResponseEntity<String> contactUs(@RequestBody Map<String, String> requestBody) {
+        String email = requestBody.get("email");
+        String question = requestBody.get("question");
+        if (email != null && question != null && userService.contactUs(email, question)) {
+            return ResponseEntity.ok().body("");
+        } else return ResponseEntity.status(400).body("");
     }
 
 

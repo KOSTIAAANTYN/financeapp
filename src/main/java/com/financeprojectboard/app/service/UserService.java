@@ -7,6 +7,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -23,21 +24,21 @@ public class UserService {
 
 
     public String saveUser(User user) {
-        if (isExist(user)){
+        if (isExist(user)) {
             return "User exist";
-        }else{
+        } else {
             userRepository.save(user);
             return "User saved";
         }
     }
 
     public String savePass(User user) {
-        if (isExist(user)){
+        if (isExist(user)) {
             User oldUser = userRepository.findByEmail(user.getEmail());
             oldUser.setPassword(user.getPassword());
             userRepository.save(oldUser);
             return "Password saved";
-        }else {
+        } else {
             return "User doesn't exist";
         }
 
@@ -80,7 +81,6 @@ public class UserService {
     }
 
 
-
     public static String generateRandomCode() {
         int length = 6;
 
@@ -104,7 +104,38 @@ public class UserService {
         } else {
             return ResponseEntity.status(404).body("user");
         }
-
     }
 
+    public boolean changeName(Long id, String username) {
+        if (userRepository.findById(id).isPresent()) {
+            User user = userRepository.findById(id).get();
+            user.setUsername(username);
+            userRepository.save(user);
+            return true;
+        } else return false;
+    }
+
+    public boolean delUser(Long id) {
+        if (userRepository.findById(id).isPresent()) {
+            userRepository.delete(userRepository.findById(id).get());
+            return true;
+        } else return false;
+    }
+
+    public boolean contactUs(String email, String question) {
+        MimeMessage message = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom("financeprojectboard@gmail.com");
+            helper.setTo("ichkostya@gmail.com");//another Dev (maybe)
+            helper.setText(question);
+            helper.setSubject(email);
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            System.err.println("Failed to send email: " + e.getMessage());
+            return false;
+        }
+        return true;
+    }
 }
