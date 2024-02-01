@@ -14,10 +14,11 @@ import java.util.Map;
 @CrossOrigin("*")
 public class UserController {
     private final UserService userService;
-    private User userHere;
+    private User userHere;//TODO hide this
 
 
-    @PostMapping("/sendEmail")
+
+    @PostMapping("/sendEmail")//TODO mod this
     public ResponseEntity<String> sendEmail(@RequestBody User user) {
         //return message or mail code
         if (userService.isExist(user)) {
