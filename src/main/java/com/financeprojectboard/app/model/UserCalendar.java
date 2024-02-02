@@ -25,13 +25,14 @@ public class UserCalendar {
     private User user;
 
 
-
-
-    public void addDay(CalendarDay day) {
+    public void addDay(String date, String fullData) {
+        CalendarDay calendarDay = new CalendarDay(date, fullData);
         if (calendar.size() >= maxSize) {
             calendar.remove(0);
         }
-        calendar.add(day);
+        calendarDay.setUserCalendar(this);
+        calendar.add(calendarDay);
+
     }
 
     public void AllTotal() {

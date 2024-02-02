@@ -16,4 +16,14 @@ public class Message {
     @JoinColumn
     @ManyToOne
     private CalendarDay calendarDay;
+
+    public Message(boolean isIncome, String description, double price) {
+        this.isIncome = isIncome;
+        this.description = description;
+        this.price = price;
+    }
+
+    public Message() {
+
+    }
 }

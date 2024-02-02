@@ -17,6 +17,13 @@ public class UserController {
     private User userHere;//TODO hide this
 
 
+    //test new
+    @PostMapping("/testUser")
+    public ResponseEntity<String> testUser(@RequestBody User user) {
+
+        return ResponseEntity.ok(userService.saveTestUser(user));
+    }
+
 
     @PostMapping("/sendEmail")//TODO mod this
     public ResponseEntity<String> sendEmail(@RequestBody User user) {

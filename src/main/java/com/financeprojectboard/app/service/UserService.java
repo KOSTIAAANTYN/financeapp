@@ -23,6 +23,14 @@ public class UserService {
     private final JavaMailSender mailSender;
 
 
+    //test new
+    public String saveTestUser(User user) {
+        User user1 = new User(user.getUsername(), user.getEmail(), user.getPassword());
+        userRepository.save(user1);
+        return "ok";
+    }
+
+
     public String saveUser(User user) {
         if (isExist(user)) {
             return "User exist";
@@ -41,7 +49,6 @@ public class UserService {
         } else {
             return "User doesn't exist";
         }
-
     }
 
 
@@ -138,4 +145,6 @@ public class UserService {
         }
         return true;
     }
+
+
 }
