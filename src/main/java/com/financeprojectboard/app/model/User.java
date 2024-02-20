@@ -1,5 +1,6 @@
 package com.financeprojectboard.app.model;
 
+import com.financeprojectboard.app.DTO.UserDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -25,6 +26,24 @@ public class User {
         this.password = password;
         this.userCalendar = new UserCalendar();
         this.userCalendar.setUser(this);
+        generate0Calendar();
+    }
+
+    public User() {
+    }
+
+    public UserDTO toDTO() {
+        UserDTO dto = new UserDTO();
+        dto.setId(this.id);
+
+        if (this.userCalendar != null) {
+            dto.setUserCalendar(this.userCalendar.toDTO());
+        }
+
+        return dto;
+    }
+
+    public void generate0Calendar(){
 
         DateTimeFormatter dt = DateTimeFormatter.ofPattern("dd");
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -37,8 +56,5 @@ public class User {
             j++;
             userCalendar.addDay(currentDateMinus.plusDays(j).format(dt), currentDateMinus.plusDays(j).format(dtf));
         }
-    }
-
-    public User() {
     }
 }

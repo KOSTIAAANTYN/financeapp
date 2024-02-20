@@ -1,8 +1,8 @@
 package com.financeprojectboard.app.controller;
 
+import com.financeprojectboard.app.DTO.UserDTO;
 import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.service.UserService;
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +16,26 @@ public class UserController {
     private final UserService userService;
     private User userHere;//TODO hide this
 
-
+    @PostMapping("/getTestUser")
+    @ResponseBody
+    public ResponseEntity<UserDTO> getTestUser(@RequestBody User user1) {
+        User user =  userService.getUser(user1.getId());
+        if (user!=null){
+        UserDTO userDTO = user.toDTO();
+        return ResponseEntity.ok(userDTO);
+    }
+        else return ResponseEntity.badRequest().build();
+    }
     //test new
     @PostMapping("/testUser")
     public ResponseEntity<String> testUser(@RequestBody User user) {
 
         return ResponseEntity.ok(userService.saveTestUser(user));
+    }
+
+    @PostMapping("/testFullCal")
+    public ResponseEntity<String> testFullCall(@RequestBody User user){
+        return ResponseEntity.ok(userService.saveFullUser(user));
     }
 
 
@@ -39,9 +53,10 @@ public class UserController {
 
     @PostMapping("/createUser")
     public ResponseEntity<String> createUser() {
+
         //take date from prev req
         //saved user
-        return ResponseEntity.ok(userService.saveUser(userHere));
+        return ResponseEntity.ok(userService.saveTestUser(userHere));
     }
 
     @PostMapping("/login")
@@ -49,6 +64,7 @@ public class UserController {
     public Object login(@RequestBody User user) {
         //return message or find user
         if (userService.isExist(user)) {
+//            userService.checkLongLogin(user);
             return userService.getUser(user);
         } else {
             return ResponseEntity.status(404).body("user");

@@ -1,10 +1,13 @@
 package com.financeprojectboard.app.model;
 
+import com.financeprojectboard.app.DTO.CalendarDayDTO;
+import com.financeprojectboard.app.DTO.MessageDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -13,7 +16,7 @@ public class CalendarDay {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String date;
-    private String fullData;
+    private String fullDate;
     private double total;
 
     @JoinColumn
@@ -23,9 +26,9 @@ public class CalendarDay {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "calendarDay")
     private List<Message> messages = new ArrayList<>();
 
-    public CalendarDay(String date, String fullData) {
+    public CalendarDay(String date, String fullDate) {
         this.date = date;
-        this.fullData = fullData;
+        this.fullDate = fullDate;
         this.messages = new ArrayList<>();
     }
 
@@ -40,6 +43,23 @@ public class CalendarDay {
 
     }
 
+    public CalendarDayDTO toDTO() {
+        CalendarDayDTO dto = new CalendarDayDTO();
+        dto.setId(this.id);
+        dto.setDate(Integer.parseInt(this.date));
+        dto.setFullDate(this.fullDate);
+        dto.setTotal(this.total);
+        dto.setCalendarId(this.userCalendar.getId());
+
+        List<MessageDTO> messageDTOList = this.messages.stream()
+                .map(Message::toDTO)
+                .collect(Collectors.toList());
+
+        dto.setMessages(messageDTOList);
+
+        return dto;
+    }
+
 
     public void TotalDay() {
         if (!messages.isEmpty()) {
@@ -52,4 +72,5 @@ public class CalendarDay {
             }
         }
     }
+
 }

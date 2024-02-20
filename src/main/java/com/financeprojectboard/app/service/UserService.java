@@ -7,13 +7,14 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
 @Service
@@ -28,6 +29,30 @@ public class UserService {
         User user1 = new User(user.getUsername(), user.getEmail(), user.getPassword());
         userRepository.save(user1);
         return "ok";
+    }
+
+    public String saveFullUser(User user) {
+        User oldUser = userRepository.findById(user.getId()).get();
+        oldUser.setUserCalendar(user.getUserCalendar());
+        userRepository.save(oldUser);
+        return "ok";
+    }
+
+    public void checkLongLogin(User user) {
+//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+//
+//        userRepository.findById(user.getId()).get()
+//                .getUserCalendar().getCalendar().getLast();
+//
+//        LocalDate lastLoginDay = LocalDate.parse((userRepository.findById(user.getId()).get()
+//                .getUserCalendar().getCalendar().getLast().getFullDate()), dtf);
+//        LocalDate localDate=LocalDate.now();
+//
+//        long daysBetween = Period.between(lastLoginDay,localDate).getDays();
+//
+//        if(daysBetween>35){
+//            System.out.println(">35");
+//        }else System.out.println("<35");
     }
 
 
@@ -111,6 +136,13 @@ public class UserService {
         } else {
             return ResponseEntity.status(404).body("user");
         }
+    }
+
+    public User getUser(Long id) {
+        if (userRepository.findById(id).isPresent()){
+        return userRepository.findById(id)
+                .get();}
+        else return null;
     }
 
     public boolean changeName(Long id, String username) {

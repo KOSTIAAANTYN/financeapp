@@ -1,10 +1,13 @@
 package com.financeprojectboard.app.model;
 
+import com.financeprojectboard.app.DTO.CalendarDayDTO;
+import com.financeprojectboard.app.DTO.UserCalendarDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
@@ -23,6 +26,23 @@ public class UserCalendar {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")//idk
     private User user;
+
+
+    public UserCalendarDTO toDTO() {
+        UserCalendarDTO dto = new UserCalendarDTO();
+        dto.setId(this.id);
+        dto.setGlobalTotal(this.globalTotal);
+        dto.setWeekTotal(this.weekTotal);
+        dto.setUserId(this.user.getId());
+
+        List<CalendarDayDTO> calendarDTOList = this.calendar.stream()
+                .map(CalendarDay::toDTO)
+                .collect(Collectors.toList());
+
+        dto.setCalendar(calendarDTOList);
+
+        return dto;
+    }
 
 
     public void addDay(String date, String fullData) {
