@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Entity
 public class CalendarDay {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String date;
     private String fullDate;

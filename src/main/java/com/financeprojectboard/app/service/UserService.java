@@ -1,6 +1,12 @@
 package com.financeprojectboard.app.service;
 
+import com.financeprojectboard.app.DTO.MessageDTO;
+import com.financeprojectboard.app.model.CalendarDay;
+import com.financeprojectboard.app.model.Message;
 import com.financeprojectboard.app.model.User;
+import com.financeprojectboard.app.model.UserCalendar;
+import com.financeprojectboard.app.repositories.CalendarDayRepository;
+import com.financeprojectboard.app.repositories.MessageRepository;
 import com.financeprojectboard.app.repositories.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -15,58 +21,95 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final CalendarDayRepository calendarDayRepository;
+    private final MessageRepository messageRepository;
     private final JavaMailSender mailSender;
 
 
+
+    public void saveMessage(Long userId, Long dayId, List<MessageDTO> messages) {
+        if (userRepository.findById(userId).isPresent()) {
+            User user = userRepository.findById(userId).get();
+            CalendarDay day = user.getUserCalendar().getCalendar().get(dayId.intValue());
+
+            for (int i = 0; i < messages.size(); i++) {
+                if (day.getMessages().size() <= i) {
+                    // Add new
+                    MessageDTO messageDTO = messages.get(i);
+                    Message message = new Message(
+                            messageDTO.isIncome(), messageDTO.getDescription(), messageDTO.getPrice());
+                    message.setCalendarDay(day);
+                    messageRepository.save(message);
+                } else {
+                    // Update
+                    MessageDTO messageDTO = messages.get(i);
+                    Message message = day.getMessages().get(i);
+
+                    if (!messageDTO.equals(message.toDTO())) {
+                        message.setIncome(messageDTO.isIncome());
+                        message.setDescription(messageDTO.getDescription());
+                        message.setPrice(messageDTO.getPrice());
+                        messageRepository.save(message);
+                    }
+                }
+            }
+            calendarDayRepository.save(day);
+        }
+    }
+
+
+
     //test new
-    public String saveTestUser(User user) {
+    public String saveUserC(User user) {
         User user1 = new User(user.getUsername(), user.getEmail(), user.getPassword());
         userRepository.save(user1);
         return "ok";
     }
 
-    public String saveFullUser(User user) {
-        User oldUser = userRepository.findById(user.getId()).get();
-        oldUser.setUserCalendar(user.getUserCalendar());
-        userRepository.save(oldUser);
-        return "ok";
-    }
 
     public void checkLongLogin(User user) {
-//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-//
-//        userRepository.findById(user.getId()).get()
-//                .getUserCalendar().getCalendar().getLast();
-//
-//        LocalDate lastLoginDay = LocalDate.parse((userRepository.findById(user.getId()).get()
-//                .getUserCalendar().getCalendar().getLast().getFullDate()), dtf);
-//        LocalDate localDate=LocalDate.now();
-//
-//        long daysBetween = Period.between(lastLoginDay,localDate).getDays();
-//
-//        if(daysBetween>35){
-//            System.out.println(">35");
-//        }else System.out.println("<35");
-    }
+        DateTimeFormatter dt = DateTimeFormatter.ofPattern("dd");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
+        Optional<User> optionalUser = userRepository.findById(user.getId());
 
-    public String saveUser(User user) {
-        if (isExist(user)) {
-            return "User exist";
-        } else {
-            userRepository.save(user);
-            return "User saved";
+        if (optionalUser.isPresent()) {
+            User existingUser = optionalUser.get();
+            UserCalendar userCalendar = existingUser.getUserCalendar();
+            List<CalendarDay> calendar = userCalendar.getCalendar();
+
+            if (!calendar.isEmpty()) {
+                CalendarDay lastCalendarDay = calendar.get(calendar.size() - 1);
+                LocalDate lastLoginDay = LocalDate.parse(lastCalendarDay.getFullDate(), dtf);
+                LocalDate localDate = LocalDate.now();
+
+                Period period = Period.between(lastLoginDay, localDate);
+                int daysBetween = period.getDays();
+
+                if (daysBetween > 35) {
+                    user.generate0Calendar();
+                } else {
+                    for (int i = 1; i <= daysBetween; i++) {
+                        LocalDate nextDay = lastLoginDay.plusDays(i);
+                        userCalendar.addDay(nextDay.format(dt), nextDay.format(dtf));
+                    }
+                }
+            }
         }
+
     }
+
 
     public String savePass(User user) {
-        if (isExist(user)) {
+        if (isExist(user.getEmail())) {
             User oldUser = userRepository.findByEmail(user.getEmail());
             oldUser.setPassword(user.getPassword());
             userRepository.save(oldUser);
@@ -77,12 +120,12 @@ public class UserService {
     }
 
 
-    public boolean isExist(User user) {
-        return userRepository.findByEmail(user.getEmail()) != null;
+    public boolean isExist(String email) {
+        return userRepository.findByEmail(email) != null;
     }
 
 
-    public String emailAuth(User user) {
+    public String emailAuth(String email) {
         String code = generateRandomCode();
         MimeMessage message = mailSender.createMimeMessage();
         try {
@@ -90,7 +133,7 @@ public class UserService {
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
 
             helper.setFrom("financeprojectboard@gmail.com");
-            helper.setTo(user.getEmail());
+            helper.setTo(email);
             helper.setSubject("Your code for finance app");
 
 
@@ -129,20 +172,21 @@ public class UserService {
         return code.toString();
     }
 
-
-    public Object getUser(User user) {
+    //get by email and equals pass
+    public ResponseEntity<User> getUser(User user) {
         if (user.getPassword().equals(userRepository.findByEmail(user.getEmail()).getPassword())) {
             return ResponseEntity.ok(userRepository.findByEmail(user.getEmail()));
         } else {
-            return ResponseEntity.status(404).body("user");
+            return ResponseEntity.badRequest().build();
         }
     }
 
+    //get(id)
     public User getUser(Long id) {
-        if (userRepository.findById(id).isPresent()){
-        return userRepository.findById(id)
-                .get();}
-        else return null;
+        if (userRepository.findById(id).isPresent()) {
+            return userRepository.findById(id)
+                    .get();
+        } else return null;
     }
 
     public boolean changeName(Long id, String username) {

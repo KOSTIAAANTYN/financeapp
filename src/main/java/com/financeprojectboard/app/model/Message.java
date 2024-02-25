@@ -8,7 +8,7 @@ import lombok.Data;
 @Entity
 public class Message {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private boolean isIncome;
     private String description;

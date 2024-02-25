@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Data
 public class UserCalendar {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private double globalTotal = 0;
     private double weekTotal = 0;
