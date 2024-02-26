@@ -34,7 +34,6 @@ public class UserService {
     private final JavaMailSender mailSender;
 
 
-
     public void saveMessage(Long userId, Long dayId, List<MessageDTO> messages) {
         if (userRepository.findById(userId).isPresent()) {
             User user = userRepository.findById(userId).get();
@@ -45,7 +44,7 @@ public class UserService {
                     // Add new
                     MessageDTO messageDTO = messages.get(i);
                     Message message = new Message(
-                            messageDTO.isIncome(), messageDTO.getDescription(), messageDTO.getPrice());
+                            messageDTO.getIsIncome(), messageDTO.getDescription(), messageDTO.getPrice());
                     message.setCalendarDay(day);
                     messageRepository.save(message);
                 } else {
@@ -54,7 +53,7 @@ public class UserService {
                     Message message = day.getMessages().get(i);
 
                     if (!messageDTO.equals(message.toDTO())) {
-                        message.setIncome(messageDTO.isIncome());
+                        message.setIncome(messageDTO.getIsIncome());
                         message.setDescription(messageDTO.getDescription());
                         message.setPrice(messageDTO.getPrice());
                         messageRepository.save(message);
@@ -64,7 +63,6 @@ public class UserService {
             calendarDayRepository.save(day);
         }
     }
-
 
 
     //test new
@@ -79,28 +77,24 @@ public class UserService {
         DateTimeFormatter dt = DateTimeFormatter.ofPattern("dd");
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-        Optional<User> optionalUser = userRepository.findById(user.getId());
+        User existingUser = userRepository.findByEmail(user.getEmail());
+        UserCalendar userCalendar = existingUser.getUserCalendar();
+        List<CalendarDay> calendar = userCalendar.getCalendar();
 
-        if (optionalUser.isPresent()) {
-            User existingUser = optionalUser.get();
-            UserCalendar userCalendar = existingUser.getUserCalendar();
-            List<CalendarDay> calendar = userCalendar.getCalendar();
+        if (!calendar.isEmpty()) {
+            CalendarDay lastCalendarDay = calendar.get(calendar.size() - 1);
+            LocalDate lastLoginDay = LocalDate.parse(lastCalendarDay.getFullDate(), dtf);
+            LocalDate localDate = LocalDate.now();
 
-            if (!calendar.isEmpty()) {
-                CalendarDay lastCalendarDay = calendar.get(calendar.size() - 1);
-                LocalDate lastLoginDay = LocalDate.parse(lastCalendarDay.getFullDate(), dtf);
-                LocalDate localDate = LocalDate.now();
+            Period period = Period.between(lastLoginDay, localDate);
+            int daysBetween = period.getDays();
 
-                Period period = Period.between(lastLoginDay, localDate);
-                int daysBetween = period.getDays();
-
-                if (daysBetween > 35) {
-                    user.generate0Calendar();
-                } else {
-                    for (int i = 1; i <= daysBetween; i++) {
-                        LocalDate nextDay = lastLoginDay.plusDays(i);
-                        userCalendar.addDay(nextDay.format(dt), nextDay.format(dtf));
-                    }
+            if (daysBetween > 35) {
+                user.generate0Calendar();
+            } else {
+                for (int i = 1; i <= daysBetween; i++) {
+                    LocalDate nextDay = lastLoginDay.plusDays(i);
+                    userCalendar.addDay(nextDay.format(dt), nextDay.format(dtf));
                 }
             }
         }
@@ -173,20 +167,10 @@ public class UserService {
     }
 
     //get by email and equals pass
-    public ResponseEntity<User> getUser(User user) {
-        if (user.getPassword().equals(userRepository.findByEmail(user.getEmail()).getPassword())) {
-            return ResponseEntity.ok(userRepository.findByEmail(user.getEmail()));
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    //get(id)
-    public User getUser(Long id) {
-        if (userRepository.findById(id).isPresent()) {
-            return userRepository.findById(id)
-                    .get();
-        } else return null;
+    public User getUser(String email,String password) {
+        if (password.equals(userRepository.findByEmail(email).getPassword())) {
+            return userRepository.findByEmail(email);
+        }else return null;
     }
 
     public boolean changeName(Long id, String username) {

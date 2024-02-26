@@ -2,8 +2,10 @@ package com.financeprojectboard.app.controller;
 
 import com.financeprojectboard.app.DTO.MessageDTO;
 import com.financeprojectboard.app.DTO.MessageRequestDTO;
+import com.financeprojectboard.app.DTO.UserCalendarDTO;
 import com.financeprojectboard.app.DTO.UserDTO;
 import com.financeprojectboard.app.model.User;
+import com.financeprojectboard.app.model.UserCalendar;
 import com.financeprojectboard.app.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,37 +19,16 @@ import java.util.Map;
 @CrossOrigin("*")
 public class UserController {
     private final UserService userService;
-    //TODO sync by front (I deleted userHere and no req without user)
-    //TODO code saves always false
 
-    //test new
-    @PostMapping("/testUser")
-    public ResponseEntity<String> testUser(@RequestBody User user) {
-
-        return ResponseEntity.ok(userService.saveUserC(user));
-    }
-
-
+//TODO update save cal src/main/resources/templates/cal.json
     @PostMapping("/saveMessages")
     public ResponseEntity<String> saveMessage(@RequestBody MessageRequestDTO messageRequestDTO) {
         Long userId = messageRequestDTO.getUserId();
         Long dayId = messageRequestDTO.getDayId();
+
         List<MessageDTO> messages = messageRequestDTO.getMessages();
         userService.saveMessage(userId, dayId, messages);
         return ResponseEntity.ok("Messages saved successfully");
-    }
-
-
-
-
-    @PostMapping("/getUser")
-    @ResponseBody
-    public ResponseEntity<UserDTO> getUser(@RequestBody User user1) {
-        User user = userService.getUser(user1.getId());
-        if (user != null) {
-            UserDTO userDTO = user.toDTO();
-            return ResponseEntity.ok(userDTO);
-        } else return ResponseEntity.badRequest().build();
     }
 
 
@@ -71,9 +52,16 @@ public class UserController {
     @ResponseBody
     public Object login(@RequestBody User user) {
         //return message or find user
-        if (userService.isExist(user.getEmail())) {
+        //email,pass
+        User user1= userService
+                .getUser(user.getEmail(),user.getPassword());
+
+        if (userService.isExist(user.getEmail()) && user1!=null) {
+            UserCalendar userCalendar =user1.getUserCalendar();
             userService.checkLongLogin(user);
-            return userService.getUser(user);
+
+            UserCalendarDTO userCalendarDTO = userCalendar.toDTO();
+            return ResponseEntity.ok(userCalendarDTO);
         } else {
             return ResponseEntity.status(404).body("user");
         }

@@ -11,5 +11,8 @@ public class UserCalendarDTO {
     private double globalTotal;
     private double weekTotal;
     private Long userId;
+    private String username;
+    private String email;
+    private String password;
     private List<CalendarDayDTO> calendar;
 }

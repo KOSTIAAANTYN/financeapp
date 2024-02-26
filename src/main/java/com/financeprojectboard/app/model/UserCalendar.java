@@ -34,6 +34,9 @@ public class UserCalendar {
         dto.setGlobalTotal(this.globalTotal);
         dto.setWeekTotal(this.weekTotal);
         dto.setUserId(this.user.getId());
+        dto.setEmail(this.user.getEmail());
+        dto.setUsername(this.user.getUsername());
+        dto.setPassword(this.user.getPassword());
 
         List<CalendarDayDTO> calendarDTOList = this.calendar.stream()
                 .map(CalendarDay::toDTO)

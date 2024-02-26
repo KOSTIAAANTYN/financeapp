@@ -35,10 +35,13 @@ public class User {
     public UserDTO toDTO() {
         UserDTO dto = new UserDTO();
         dto.setId(this.id);
+        dto.setEmail(this.email);
+        dto.setUsername(this.username);
+        dto.setPassword(this.password);
 
-        if (this.userCalendar != null) {
-            dto.setUserCalendar(this.userCalendar.toDTO());
-        }
+//        if (this.userCalendar != null) {
+//            dto.setUserCalendar(this.userCalendar.toDTO());
+//        }
 
         return dto;
     }

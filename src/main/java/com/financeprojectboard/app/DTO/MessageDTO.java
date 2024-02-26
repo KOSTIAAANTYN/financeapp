@@ -10,4 +10,8 @@ public class MessageDTO {
     private boolean isIncome;
     private String description;
     private double price;
+
+    public boolean getIsIncome(){
+        return isIncome;
+    }
 }

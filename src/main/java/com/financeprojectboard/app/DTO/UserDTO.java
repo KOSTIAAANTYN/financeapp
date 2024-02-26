@@ -6,5 +6,8 @@ import lombok.Data;
 
 public class UserDTO {
     private long id;
-    private UserCalendarDTO userCalendar;
+    private String username;
+    private String email;
+    private String password;
+//    private UserCalendarDTO userCalendar;
 }
