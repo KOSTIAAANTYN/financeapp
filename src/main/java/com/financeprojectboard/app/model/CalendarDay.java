@@ -23,7 +23,7 @@ public class CalendarDay {
     @ManyToOne
     private UserCalendar userCalendar;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "calendarDay")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "calendarDay")
     private List<Message> messages = new ArrayList<>();
 
     public CalendarDay(String date, String fullDate) {

@@ -20,6 +20,18 @@ import java.util.Map;
 public class UserController {
     private final UserService userService;
 
+    @PostMapping("/test")
+    public Object test(@RequestBody User user) {
+        User user1 = userService
+                .getUser(user.getEmail(), user.getPassword());
+
+        userService.test(user1);
+        UserCalendar userCalendar = user1.getUserCalendar();
+        UserCalendarDTO userCalendarDTO = userCalendar.toDTO();
+        return ResponseEntity.ok(userCalendarDTO);
+    }
+
+
 //TODO update save cal src/main/resources/templates/cal.json
     @PostMapping("/saveMessages")
     public ResponseEntity<String> saveMessage(@RequestBody MessageRequestDTO messageRequestDTO) {
@@ -58,7 +70,7 @@ public class UserController {
 
         if (userService.isExist(user.getEmail()) && user1!=null) {
             UserCalendar userCalendar =user1.getUserCalendar();
-            userService.checkLongLogin(user);
+            userService.checkLongLogin(user1);
 
             UserCalendarDTO userCalendarDTO = userCalendar.toDTO();
             return ResponseEntity.ok(userCalendarDTO);
@@ -76,7 +88,6 @@ public class UserController {
         } else {
             return ResponseEntity.status(404).body("User doesn't exist");
         }
-
     }
 
     //saved changed pass

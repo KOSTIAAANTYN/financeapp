@@ -7,6 +7,7 @@ import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.model.UserCalendar;
 import com.financeprojectboard.app.repositories.CalendarDayRepository;
 import com.financeprojectboard.app.repositories.MessageRepository;
+import com.financeprojectboard.app.repositories.UserCalendarRepository;
 import com.financeprojectboard.app.repositories.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -29,9 +31,29 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final UserCalendarRepository userCalendarRepository;
     private final CalendarDayRepository calendarDayRepository;
     private final MessageRepository messageRepository;
     private final JavaMailSender mailSender;
+
+
+    public void test(User user) {
+//        UserCalendar userCalendar = user.getUserCalendar();
+//        List<CalendarDay> calendar = userCalendar.getCalendar();
+//
+//        Long id = calendar.get(0).getId();
+//
+//        calendar.remove(0);
+//        calendarDayRepository.deleteById(id);
+//        userCalendarRepository.save(userCalendar);
+
+//        user.deleteUserCalendar();
+//        userCalendarRepository.delete(userCalendar);
+//        user.generate0Calendar();
+//        userRepository.save(user);
+
+
+    }
 
 
     public void saveMessage(Long userId, Long dayId, List<MessageDTO> messages) {
@@ -72,14 +94,15 @@ public class UserService {
         return "ok";
     }
 
-
     public void checkLongLogin(User user) {
+
         DateTimeFormatter dt = DateTimeFormatter.ofPattern("dd");
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-        User existingUser = userRepository.findByEmail(user.getEmail());
-        UserCalendar userCalendar = existingUser.getUserCalendar();
+
+        UserCalendar userCalendar = user.getUserCalendar();
         List<CalendarDay> calendar = userCalendar.getCalendar();
+
 
         if (!calendar.isEmpty()) {
             CalendarDay lastCalendarDay = calendar.get(calendar.size() - 1);
@@ -87,16 +110,30 @@ public class UserService {
             LocalDate localDate = LocalDate.now();
 
             Period period = Period.between(lastLoginDay, localDate);
-            int daysBetween = period.getDays();
+            int daysBetween = period.getDays() + period.getMonths() * 30 + period.getYears() * 365;
 
-            if (daysBetween > 35) {
+            if (daysBetween >= 35) {
+                //dell old and gen new -1d
+                user.deleteUserCalendar();
+                userCalendarRepository.delete(userCalendar);
+                userRepository.save(user);
+
                 user.generate0Calendar();
+                userRepository.save(user);
             } else {
                 for (int i = 1; i <= daysBetween; i++) {
+                    //add new del first
                     LocalDate nextDay = lastLoginDay.plusDays(i);
                     userCalendar.addDay(nextDay.format(dt), nextDay.format(dtf));
+
+                    Long id = calendar.get(0).getId();
+
+                    calendar.remove(0);
+                    calendarDayRepository.deleteById(id);
+
                 }
             }
+            userCalendarRepository.save(userCalendar);
         }
 
     }
@@ -167,10 +204,10 @@ public class UserService {
     }
 
     //get by email and equals pass
-    public User getUser(String email,String password) {
+    public User getUser(String email, String password) {
         if (password.equals(userRepository.findByEmail(email).getPassword())) {
             return userRepository.findByEmail(email);
-        }else return null;
+        } else return null;
     }
 
     public boolean changeName(Long id, String username) {

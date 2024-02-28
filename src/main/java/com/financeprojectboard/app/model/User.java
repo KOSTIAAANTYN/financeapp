@@ -24,8 +24,8 @@ public class User {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.userCalendar = new UserCalendar();
-        this.userCalendar.setUser(this);
+//        this.userCalendar = new UserCalendar();
+//        this.userCalendar.setUser(this);
         generate0Calendar();
     }
 
@@ -47,17 +47,24 @@ public class User {
     }
 
     public void generate0Calendar(){
+        this.userCalendar = new UserCalendar();
+        this.userCalendar.setUser(this);
 
         DateTimeFormatter dt = DateTimeFormatter.ofPattern("dd");
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
         LocalDate localDate = LocalDate.now();
         LocalDate currentDateMinus = LocalDate.now().minusDays(35);
-
+////      for test
+//        LocalDate localDate = LocalDate.now().minusDays(35);
+//        LocalDate currentDateMinus = localDate.minusDays(35);
         int j = 0;
         while (!currentDateMinus.plusDays(j).equals(localDate)) {
             j++;
             userCalendar.addDay(currentDateMinus.plusDays(j).format(dt), currentDateMinus.plusDays(j).format(dtf));
         }
+    }
+    public void deleteUserCalendar(){
+        this.userCalendar = null;
     }
 }

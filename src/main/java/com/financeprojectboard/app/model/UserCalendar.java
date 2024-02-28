@@ -19,7 +19,7 @@ public class UserCalendar {
     private double weekTotal = 0;
     private final int maxSize = 35;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "userCalendar")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "userCalendar")
     private List<CalendarDay> calendar = new ArrayList<>();
 
 
@@ -50,12 +50,8 @@ public class UserCalendar {
 
     public void addDay(String date, String fullData) {
         CalendarDay calendarDay = new CalendarDay(date, fullData);
-        if (calendar.size() >= maxSize) {
-            calendar.remove(0);
-        }
         calendarDay.setUserCalendar(this);
         calendar.add(calendarDay);
-
     }
 
     public void AllTotal() {
