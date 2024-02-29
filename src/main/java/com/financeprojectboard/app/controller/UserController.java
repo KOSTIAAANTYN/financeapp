@@ -1,9 +1,6 @@
 package com.financeprojectboard.app.controller;
 
-import com.financeprojectboard.app.DTO.MessageDTO;
-import com.financeprojectboard.app.DTO.MessageRequestDTO;
 import com.financeprojectboard.app.DTO.UserCalendarDTO;
-import com.financeprojectboard.app.DTO.UserDTO;
 import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.model.UserCalendar;
 import com.financeprojectboard.app.service.UserService;
@@ -11,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -21,26 +17,15 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/test")
-    public Object test(@RequestBody User user) {
-        User user1 = userService
-                .getUser(user.getEmail(), user.getPassword());
-
-        userService.test(user1);
-        UserCalendar userCalendar = user1.getUserCalendar();
-        UserCalendarDTO userCalendarDTO = userCalendar.toDTO();
-        return ResponseEntity.ok(userCalendarDTO);
+    public Object test(@RequestBody UserCalendarDTO userCalendarDTO) {
+        userService.test(userCalendarDTO);
+        return ResponseEntity.ok();
     }
 
 
-//TODO update save cal src/main/resources/templates/cal.json
-    @PostMapping("/saveMessages")
-    public ResponseEntity<String> saveMessage(@RequestBody MessageRequestDTO messageRequestDTO) {
-        Long userId = messageRequestDTO.getUserId();
-        Long dayId = messageRequestDTO.getDayId();
-
-        List<MessageDTO> messages = messageRequestDTO.getMessages();
-        userService.saveMessage(userId, dayId, messages);
-        return ResponseEntity.ok("Messages saved successfully");
+    @PostMapping("/updateCalendar")
+    public ResponseEntity<String> updateCalendar(@RequestBody UserCalendarDTO userCalendarDTO) {
+        return userService.updateUserCalendar(userCalendarDTO);
     }
 
 

@@ -24,8 +24,6 @@ public class User {
         this.username = username;
         this.email = email;
         this.password = password;
-//        this.userCalendar = new UserCalendar();
-//        this.userCalendar.setUser(this);
         generate0Calendar();
     }
 

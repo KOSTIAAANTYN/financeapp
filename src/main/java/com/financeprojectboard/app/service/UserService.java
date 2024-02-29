@@ -1,8 +1,7 @@
 package com.financeprojectboard.app.service;
 
-import com.financeprojectboard.app.DTO.MessageDTO;
+import com.financeprojectboard.app.DTO.UserCalendarDTO;
 import com.financeprojectboard.app.model.CalendarDay;
-import com.financeprojectboard.app.model.Message;
 import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.model.UserCalendar;
 import com.financeprojectboard.app.repositories.CalendarDayRepository;
@@ -22,9 +21,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -37,53 +34,27 @@ public class UserService {
     private final JavaMailSender mailSender;
 
 
-    public void test(User user) {
-//        UserCalendar userCalendar = user.getUserCalendar();
-//        List<CalendarDay> calendar = userCalendar.getCalendar();
-//
-//        Long id = calendar.get(0).getId();
-//
-//        calendar.remove(0);
-//        calendarDayRepository.deleteById(id);
-//        userCalendarRepository.save(userCalendar);
-
-//        user.deleteUserCalendar();
-//        userCalendarRepository.delete(userCalendar);
-//        user.generate0Calendar();
-//        userRepository.save(user);
-
-
+    public void test(UserCalendarDTO userCalendarDTO) {
     }
 
 
-    public void saveMessage(Long userId, Long dayId, List<MessageDTO> messages) {
-        if (userRepository.findById(userId).isPresent()) {
-            User user = userRepository.findById(userId).get();
-            CalendarDay day = user.getUserCalendar().getCalendar().get(dayId.intValue());
+    public ResponseEntity<String> updateUserCalendar(UserCalendarDTO userCalendarDTO) {
+        if (userRepository.findById(userCalendarDTO.getUserId()).isPresent()) {
+            User user = userRepository.findById(userCalendarDTO.getUserId()).get();
+            UserCalendar userCalendar = user.getUserCalendar();
 
-            for (int i = 0; i < messages.size(); i++) {
-                if (day.getMessages().size() <= i) {
-                    // Add new
-                    MessageDTO messageDTO = messages.get(i);
-                    Message message = new Message(
-                            messageDTO.getIsIncome(), messageDTO.getDescription(), messageDTO.getPrice());
-                    message.setCalendarDay(day);
-                    messageRepository.save(message);
-                } else {
-                    // Update
-                    MessageDTO messageDTO = messages.get(i);
-                    Message message = day.getMessages().get(i);
+            user.deleteUserCalendar();
+            userCalendarRepository.delete(userCalendar);
+            userRepository.save(user);
 
-                    if (!messageDTO.equals(message.toDTO())) {
-                        message.setIncome(messageDTO.getIsIncome());
-                        message.setDescription(messageDTO.getDescription());
-                        message.setPrice(messageDTO.getPrice());
-                        messageRepository.save(message);
-                    }
-                }
-            }
-            calendarDayRepository.save(day);
+            user.setUserCalendar(userCalendarDTO.toEntity(user));
+            userRepository.save(user);
+            return ResponseEntity.ok().body("User calendar updated successfully");
+        } else {
+            return ResponseEntity.notFound().build();
         }
+
+
     }
 
 

@@ -54,7 +54,7 @@ public class UserCalendar {
         calendar.add(calendarDay);
     }
 
-    public void AllTotal() {
+    public void allTotal() {
         for (CalendarDay calendarDay : calendar) {
             calendarDay.TotalDay();
             globalTotal += calendarDay.getTotal();

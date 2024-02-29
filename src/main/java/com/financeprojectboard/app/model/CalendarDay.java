@@ -46,7 +46,7 @@ public class CalendarDay {
     public CalendarDayDTO toDTO() {
         CalendarDayDTO dto = new CalendarDayDTO();
         dto.setId(this.id);
-        dto.setDate(Integer.parseInt(this.date));
+        dto.setDate(this.date);
         dto.setFullDate(this.fullDate);
         dto.setTotal(this.total);
         dto.setCalendarId(this.userCalendar.getId());
