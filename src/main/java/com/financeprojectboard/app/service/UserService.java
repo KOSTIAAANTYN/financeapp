@@ -5,7 +5,6 @@ import com.financeprojectboard.app.model.CalendarDay;
 import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.model.UserCalendar;
 import com.financeprojectboard.app.repositories.CalendarDayRepository;
-import com.financeprojectboard.app.repositories.MessageRepository;
 import com.financeprojectboard.app.repositories.UserCalendarRepository;
 import com.financeprojectboard.app.repositories.UserRepository;
 import jakarta.mail.MessagingException;
@@ -30,7 +29,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserCalendarRepository userCalendarRepository;
     private final CalendarDayRepository calendarDayRepository;
-    private final MessageRepository messageRepository;
     private final JavaMailSender mailSender;
 
 
@@ -39,9 +37,13 @@ public class UserService {
 
 
     public ResponseEntity<String> updateUserCalendar(UserCalendarDTO userCalendarDTO) {
-        if (userRepository.findById(userCalendarDTO.getUserId()).isPresent()) {
-            User user = userRepository.findById(userCalendarDTO.getUserId()).get();
+        if (userRepository.findById(userCalendarDTO.getId()).isPresent()) {
+            User user = userRepository.findById(userCalendarDTO.getId()).get();
             UserCalendar userCalendar = user.getUserCalendar();
+
+//            if (userCalendarDTO.toEntity(user).equals(userCalendar)) {
+//                return ResponseEntity.status(204).body("isExist");
+//            }
 
             user.deleteUserCalendar();
             userCalendarRepository.delete(userCalendar);
@@ -50,10 +52,10 @@ public class UserService {
             user.setUserCalendar(userCalendarDTO.toEntity(user));
             userRepository.save(user);
             return ResponseEntity.ok().body("User calendar updated successfully");
+
         } else {
             return ResponseEntity.notFound().build();
         }
-
 
     }
 
@@ -173,10 +175,11 @@ public class UserService {
         }
         return code.toString();
     }
-
     //get by email and equals pass
     public User getUser(String email, String password) {
-        if (password.equals(userRepository.findByEmail(email).getPassword())) {
+        User user = userRepository.findByEmail(email);
+
+        if (user!=null && password.equals(user.getPassword())) {
             return userRepository.findByEmail(email);
         } else return null;
     }

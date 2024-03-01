@@ -11,18 +11,21 @@ import java.util.stream.Collectors;
 @Data
 
 public class UserCalendarDTO {
-    private Long id;
+    private Long id;//userId
+
     private double globalTotal;
     private double weekTotal;
-    private Long userId;
+
     private String username;
     private String email;
     private String password;
+
     private List<CalendarDayDTO> calendar;
+
+
 
     public UserCalendar toEntity(User user) {
         UserCalendar userCalendar = new UserCalendar();
-        userCalendar.setId(this.id);
         userCalendar.setGlobalTotal(this.globalTotal);
         userCalendar.setWeekTotal(this.weekTotal);
 

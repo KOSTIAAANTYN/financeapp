@@ -27,13 +27,14 @@ public class UserCalendar {
     @JoinColumn(name = "user_id")//idk
     private User user;
 
-
     public UserCalendarDTO toDTO() {
         UserCalendarDTO dto = new UserCalendarDTO();
-        dto.setId(this.id);
+        dto.setId(this.user.getId());
+
         dto.setGlobalTotal(this.globalTotal);
         dto.setWeekTotal(this.weekTotal);
-        dto.setUserId(this.user.getId());
+
+
         dto.setEmail(this.user.getEmail());
         dto.setUsername(this.user.getUsername());
         dto.setPassword(this.user.getPassword());

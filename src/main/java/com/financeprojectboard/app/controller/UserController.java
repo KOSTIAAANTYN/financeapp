@@ -50,11 +50,11 @@ public class UserController {
     public Object login(@RequestBody User user) {
         //return message or find user
         //email,pass
-        User user1= userService
-                .getUser(user.getEmail(),user.getPassword());
+        User user1 = userService
+                .getUser(user.getEmail(), user.getPassword());
 
-        if (userService.isExist(user.getEmail()) && user1!=null) {
-            UserCalendar userCalendar =user1.getUserCalendar();
+        if (user1 != null && userService.isExist(user.getEmail())) {
+            UserCalendar userCalendar = user1.getUserCalendar();
             userService.checkLongLogin(user1);
 
             UserCalendarDTO userCalendarDTO = userCalendar.toDTO();
