@@ -23,7 +23,7 @@ public class UserCalendarDTO {
     private List<CalendarDayDTO> calendar;
 
 
-
+//TODO DTO to Entity?
     public UserCalendar toEntity(User user) {
         UserCalendar userCalendar = new UserCalendar();
         userCalendar.setGlobalTotal(this.globalTotal);
