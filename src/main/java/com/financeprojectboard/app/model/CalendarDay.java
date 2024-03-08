@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-@Entity
+@Entity(name = "calendar_day")
 public class CalendarDay {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,12 +32,6 @@ public class CalendarDay {
         this.messages = new ArrayList<>();
     }
 
-    public void addMessage(boolean isIncome, String description, double price) {
-        Message message = new Message(isIncome, description, price);
-        message.setCalendarDay(this);
-        messages.add(message);
-
-    }
 
     public CalendarDay() {
 

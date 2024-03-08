@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
-@Entity
+@Entity(name = "message")
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,15 +18,6 @@ public class Message {
     @ManyToOne
     private CalendarDay calendarDay;
 
-    public Message(boolean isIncome, String description, double price) {
-        this.isIncome = isIncome;
-        this.description = description;
-        this.price = price;
-    }
-
-    public Message() {
-
-    }
 
     public MessageDTO toDTO() {
         MessageDTO dto = new MessageDTO();

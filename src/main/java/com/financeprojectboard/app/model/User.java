@@ -1,14 +1,17 @@
 package com.financeprojectboard.app.model;
 
-import com.financeprojectboard.app.DTO.UserDTO;
+import com.financeprojectboard.app.DTO.UserHistoryDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
-@Entity
+@Entity(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,6 +19,9 @@ public class User {
     String username;
     String email;
     String password;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<UserHistory> userHistory=new ArrayList<>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserCalendar userCalendar;
@@ -30,16 +36,27 @@ public class User {
     public User() {
     }
 
-    public UserDTO toDTO() {
-        UserDTO dto = new UserDTO();
-        dto.setId(this.id);
-        dto.setEmail(this.email);
-        dto.setUsername(this.username);
-        dto.setPassword(this.password);
+//    public UserDTO toDTO() {
+//        UserDTO dto = new UserDTO();
+//        dto.setId(this.id);
+//        dto.setEmail(this.email);
+//        dto.setUsername(this.username);
+//        dto.setPassword(this.password);
+//
+//        return dto;
+//    }
 
-//        if (this.userCalendar != null) {
-//            dto.setUserCalendar(this.userCalendar.toDTO());
-//        }
+    public UserHistoryDTO toDTO() {
+        UserHistoryDTO dto = new UserHistoryDTO();
+        dto.setId(this.id);
+
+        dto.setGlobalTotal(this.userCalendar.getGlobalTotal());
+
+        List<UserHistoryDTO> userHistoryDTOS = this.userHistory.stream()
+                .map(UserHistory::toDTO)
+                .collect(Collectors.toList());
+
+        dto.setUserHistory(userHistoryDTOS);//херня
 
         return dto;
     }
@@ -53,7 +70,7 @@ public class User {
 
         LocalDate localDate = LocalDate.now();
         LocalDate currentDateMinus = LocalDate.now().minusDays(35);
-////      for test
+//        for test
 //        LocalDate localDate = LocalDate.now().minusDays(35);
 //        LocalDate currentDateMinus = localDate.minusDays(35);
         int j = 0;

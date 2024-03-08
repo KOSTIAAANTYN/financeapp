@@ -41,10 +41,6 @@ public class UserService {
             User user = userRepository.findById(userCalendarDTO.getId()).get();
             UserCalendar userCalendar = user.getUserCalendar();
 
-//            if (userCalendarDTO.toEntity(user).equals(userCalendar)) {
-//                return ResponseEntity.status(204).body("isExist");
-//            }
-
             user.deleteUserCalendar();
             userCalendarRepository.delete(userCalendar);
             userRepository.save(user);
@@ -60,7 +56,7 @@ public class UserService {
     }
 
 
-    //test new
+
     public String saveUserC(User user) {
         User user1 = new User(user.getUsername(), user.getEmail(), user.getPassword());
         userRepository.save(user1);

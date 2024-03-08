@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Entity
+@Entity(name = "user_calendar")
 @Data
 public class UserCalendar {
     @Id
@@ -24,7 +24,7 @@ public class UserCalendar {
 
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")//idk
+    @JoinColumn
     private User user;
 
     public UserCalendarDTO toDTO() {
