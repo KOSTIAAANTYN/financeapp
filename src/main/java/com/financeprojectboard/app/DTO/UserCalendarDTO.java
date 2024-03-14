@@ -26,21 +26,20 @@ public class UserCalendarDTO {
 
 
 
-
     public UserCalendar toEntity(User user) {
-                UserCalendar userCalendar = new UserCalendar();
+        UserCalendar userCalendar = new UserCalendar();
 
-                userCalendar.setGlobalTotal(this.globalTotal);
-                userCalendar.setWeekTotal(this.weekTotal);
+        userCalendar.setGlobalTotal(this.globalTotal);
+        userCalendar.setWeekTotal(this.weekTotal);
 
-                userCalendar.setUser(user);
+        userCalendar.setUser(user);
 
-                if (this.calendar != null) {
-                    List<CalendarDay> calendarDays = this.calendar.stream()
-                            .map(calendarDayDTO -> calendarDayDTO.toEntity(userCalendar))
-                            .collect(Collectors.toList());
-                    userCalendar.setCalendar(calendarDays);
-                    userCalendar.allTotal();
+        if (this.calendar != null) {
+            List<CalendarDay> calendarDays = this.calendar.stream()
+                    .map(calendarDayDTO -> calendarDayDTO.toEntity(userCalendar))
+                    .collect(Collectors.toList());
+            userCalendar.setCalendar(calendarDays);
+            userCalendar.allTotal();
         }
 
         return userCalendar;

@@ -1,20 +1,25 @@
 package com.financeprojectboard.app.service;
 
 import com.financeprojectboard.app.DTO.UserCalendarDTO;
+import com.financeprojectboard.app.DTO.UserHistoryDTO;
 import com.financeprojectboard.app.model.CalendarDay;
 import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.model.UserCalendar;
+import com.financeprojectboard.app.model.UserHistory;
 import com.financeprojectboard.app.repositories.CalendarDayRepository;
 import com.financeprojectboard.app.repositories.UserCalendarRepository;
+import com.financeprojectboard.app.repositories.UserHistoryRepository;
 import com.financeprojectboard.app.repositories.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -29,13 +34,33 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserCalendarRepository userCalendarRepository;
     private final CalendarDayRepository calendarDayRepository;
+    private final UserHistoryRepository userHistoryRepository;
     private final JavaMailSender mailSender;
 
 
-    public void test(UserCalendarDTO userCalendarDTO) {
+    public void addToHistory(UserHistoryDTO userHistoryDTO) {
+        User user = userRepository.findById(userHistoryDTO.getId()).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userHistoryDTO.getId()));
+        user.getUserHistory().add(userHistoryDTO.toEntity(user));
+        userRepository.save(user);
+
+    }
+
+    @Transactional
+    public void removeOneHistoryElem(Long userId, Long index) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+        Long id = user.getUserHistory().get(index.intValue()).getId();
+
+        user.getUserHistory().remove(index.intValue());
+        userHistoryRepository.deleteById(id);
     }
 
 
+    @Transactional
+    public void clearHistory(Long userId) {
+        userHistoryRepository.deleteUserHistoriesByUserId(userId);
+    }
+
+    //TODO Maybe Update Update user calendar
     public ResponseEntity<String> updateUserCalendar(UserCalendarDTO userCalendarDTO) {
         if (userRepository.findById(userCalendarDTO.getId()).isPresent()) {
             User user = userRepository.findById(userCalendarDTO.getId()).get();
@@ -212,6 +237,7 @@ public class UserService {
         }
         return true;
     }
+
 
 
 }

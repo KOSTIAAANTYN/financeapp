@@ -2,6 +2,7 @@ package com.financeprojectboard.app.model;
 
 import com.financeprojectboard.app.DTO.CalendarDayDTO;
 import com.financeprojectboard.app.DTO.UserCalendarDTO;
+import com.financeprojectboard.app.DTO.UserHistoryDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -42,7 +43,10 @@ public class UserCalendar {
         List<CalendarDayDTO> calendarDTOList = this.calendar.stream()
                 .map(CalendarDay::toDTO)
                 .collect(Collectors.toList());
-
+        List<UserHistoryDTO> userHistoryDTOS = this.user.getUserHistory().stream()
+                .map(UserHistory::toDTO)
+                .collect(Collectors.toList());
+        dto.setUserHistory(userHistoryDTOS);
         dto.setCalendar(calendarDTOList);
 
         return dto;
@@ -56,8 +60,10 @@ public class UserCalendar {
     }
 
     public void allTotal() {
+        globalTotal = 0;
+        weekTotal = 0;
         for (CalendarDay calendarDay : calendar) {
-            calendarDay.TotalDay();
+//            calendarDay.TotalDay();
             globalTotal += calendarDay.getTotal();
         }
         for (int i = 0; i < 7; i++) weekTotal += calendar.get(28 + i).getTotal();

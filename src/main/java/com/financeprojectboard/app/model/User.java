@@ -1,6 +1,4 @@
 package com.financeprojectboard.app.model;
-
-import com.financeprojectboard.app.DTO.UserHistoryDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -8,7 +6,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Data
 @Entity(name = "users")
@@ -34,31 +32,6 @@ public class User {
     }
 
     public User() {
-    }
-
-//    public UserDTO toDTO() {
-//        UserDTO dto = new UserDTO();
-//        dto.setId(this.id);
-//        dto.setEmail(this.email);
-//        dto.setUsername(this.username);
-//        dto.setPassword(this.password);
-//
-//        return dto;
-//    }
-
-    public UserHistoryDTO toDTO() {
-        UserHistoryDTO dto = new UserHistoryDTO();
-        dto.setId(this.id);
-
-        dto.setGlobalTotal(this.userCalendar.getGlobalTotal());
-
-        List<UserHistoryDTO> userHistoryDTOS = this.userHistory.stream()
-                .map(UserHistory::toDTO)
-                .collect(Collectors.toList());
-
-        dto.setUserHistory(userHistoryDTOS);//херня
-
-        return dto;
     }
 
     public void generate0Calendar(){

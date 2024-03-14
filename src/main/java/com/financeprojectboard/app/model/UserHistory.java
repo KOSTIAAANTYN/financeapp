@@ -1,6 +1,5 @@
 package com.financeprojectboard.app.model;
 
-import com.financeprojectboard.app.DTO.MessageDTO;
 import com.financeprojectboard.app.DTO.UserHistoryDTO;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,26 +15,21 @@ public class UserHistory {
     @JoinColumn
     private User user;
 
-    private String startDate;
-    private String endDate;
+    private String date;
 
-    private Boolean isMonth;
+    private String type;
 
-    private double globalTotal;
-    private double weekTotal;
+    private int total;
 
 
     public UserHistoryDTO toDTO() {
         UserHistoryDTO dto = new UserHistoryDTO();
 
-        dto.setId(this.id);
-        dto.setGlobalTotal(this.globalTotal);
+        dto.setId(this.user.getId());
 
-        dto.setWeekTotal(this.weekTotal);
-        dto.setStartDate(this.startDate);
-
-        dto.setEndDate(this.endDate);
-        dto.setIsMonth(this.isMonth);
+        dto.setTotal(this.total);
+        dto.setDate(this.date);
+        dto.setType(this.type);
 
 
         return dto;

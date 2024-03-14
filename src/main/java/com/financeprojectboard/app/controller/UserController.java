@@ -1,6 +1,7 @@
 package com.financeprojectboard.app.controller;
 
 import com.financeprojectboard.app.DTO.UserCalendarDTO;
+import com.financeprojectboard.app.DTO.UserHistoryDTO;
 import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.model.UserCalendar;
 import com.financeprojectboard.app.service.UserService;
@@ -16,10 +17,24 @@ import java.util.Map;
 public class UserController {
     private final UserService userService;
 
-    @PostMapping("/test")
-    public Object test(@RequestBody UserCalendarDTO userCalendarDTO) {
-        userService.test(userCalendarDTO);
-        return ResponseEntity.ok();
+    @PostMapping("/addToHistory")
+    public ResponseEntity<String> addToHistory(@RequestBody UserHistoryDTO userHistoryDTO) {
+        userService.addToHistory(userHistoryDTO);
+        return ResponseEntity.ok().body("ok");
+    }
+
+    @PostMapping("/removeOneHistoryElem")
+    public ResponseEntity<String> removeOneHistoryElem(@RequestBody Map<String, Long> requestBody) {
+        Long userId = requestBody.get("userId");
+        Long index = requestBody.get("index");
+        userService.removeOneHistoryElem(userId, index);
+        return ResponseEntity.ok().body("ok");
+    }
+    @PostMapping("/clearHistory")
+    public ResponseEntity<String> clearHistory(@RequestBody Map<String, Long> requestBody) {
+        Long userId = requestBody.get("userId");
+        userService.clearHistory(userId);
+        return ResponseEntity.ok().body("ok");
     }
 
 
@@ -58,6 +73,7 @@ public class UserController {
             userService.checkLongLogin(user1);
 
             UserCalendarDTO userCalendarDTO = userCalendar.toDTO();
+
             return ResponseEntity.ok(userCalendarDTO);
         } else {
             return ResponseEntity.status(404).body("user");

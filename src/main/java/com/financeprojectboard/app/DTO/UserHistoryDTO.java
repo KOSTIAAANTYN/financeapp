@@ -11,12 +11,23 @@ import java.util.stream.Collectors;
 
 @Data
 public class UserHistoryDTO {
-    private Long id;
-    private String startDate;
-    private String endDate;
+    private Long id;//userId
 
-    private Boolean isMonth;
+    private String date;
 
-    private double globalTotal;
-    private double weekTotal;
+    private String type;
+
+    private int total;
+
+    public UserHistory toEntity(User user) {
+        UserHistory userHistory = new UserHistory();
+
+        userHistory.setDate(this.date);
+        userHistory.setType(this.type);
+        userHistory.setTotal(this.total);
+
+        userHistory.setUser(user);
+
+        return userHistory;
+    }
 }
