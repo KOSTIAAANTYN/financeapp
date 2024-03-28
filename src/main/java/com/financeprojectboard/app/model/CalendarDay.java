@@ -55,16 +55,17 @@ public class CalendarDay {
     }
 
 
-//    public void TotalDay() {
-//        if (!messages.isEmpty()) {
-//            for (Message message : messages) {
-//                if (message.isIncome()) {
-//                    total += message.getPrice();
-//                } else {
-//                    total -= message.getPrice();
-//                }
-//            }
-//        }
-//    }
+    public void TotalDay() {
+        total=0;
+        if (!messages.isEmpty()) {
+            for (Message message : messages) {
+                if (message.isIncome()) {
+                    total += message.getPrice();
+                } else {
+                    total -= message.getPrice();
+                }
+            }
+        }
+    }
 
 }

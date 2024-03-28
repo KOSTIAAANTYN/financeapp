@@ -58,12 +58,12 @@ public class UserCalendar {
         calendarDay.setUserCalendar(this);
         calendar.add(calendarDay);
     }
-
+//TODO commit this
     public void allTotal() {
         globalTotal = 0;
         weekTotal = 0;
         for (CalendarDay calendarDay : calendar) {
-//            calendarDay.TotalDay();
+            calendarDay.TotalDay();
             globalTotal += calendarDay.getTotal();
         }
         for (int i = 0; i < 7; i++) weekTotal += calendar.get(28 + i).getTotal();

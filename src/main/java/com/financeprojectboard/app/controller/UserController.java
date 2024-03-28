@@ -17,6 +17,14 @@ import java.util.Map;
 public class UserController {
     private final UserService userService;
 
+    @PostMapping("/update-list")
+    public ResponseEntity<?> updateList(@RequestBody UserCalendarDTO userCalendarDTO) {
+        userService.test(userCalendarDTO);
+
+        return ResponseEntity.ok().build();
+    }
+
+
     @PostMapping("/addToHistory")
     public ResponseEntity<String> addToHistory(@RequestBody UserHistoryDTO userHistoryDTO) {
         userService.addToHistory(userHistoryDTO);

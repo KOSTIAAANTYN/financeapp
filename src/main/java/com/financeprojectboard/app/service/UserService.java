@@ -1,15 +1,11 @@
 package com.financeprojectboard.app.service;
 
+import com.financeprojectboard.app.DTO.CalendarDayDTO;
+import com.financeprojectboard.app.DTO.MessageDTO;
 import com.financeprojectboard.app.DTO.UserCalendarDTO;
 import com.financeprojectboard.app.DTO.UserHistoryDTO;
-import com.financeprojectboard.app.model.CalendarDay;
-import com.financeprojectboard.app.model.User;
-import com.financeprojectboard.app.model.UserCalendar;
-import com.financeprojectboard.app.model.UserHistory;
-import com.financeprojectboard.app.repositories.CalendarDayRepository;
-import com.financeprojectboard.app.repositories.UserCalendarRepository;
-import com.financeprojectboard.app.repositories.UserHistoryRepository;
-import com.financeprojectboard.app.repositories.UserRepository;
+import com.financeprojectboard.app.model.*;
+import com.financeprojectboard.app.repositories.*;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,8 +21,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,10 +32,71 @@ public class UserService {
     private final CalendarDayRepository calendarDayRepository;
     private final UserHistoryRepository userHistoryRepository;
     private final JavaMailSender mailSender;
+    private final MessageRepository messageRepository;
+
+
+    //if no id + message , id + message+changes=update, id_base not found = delete
+    //TODO sync with frontend
+    @Transactional
+    public void test(UserCalendarDTO userCalendarDTO) {
+        User user = userRepository.findById(userCalendarDTO.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userCalendarDTO.getId()));
+
+        UserCalendar existingUserCalendar = user.getUserCalendar();
+
+        for (CalendarDayDTO calendarDayDTO : userCalendarDTO.getCalendar()) {
+            CalendarDay existingDay = existingUserCalendar.getCalendar().stream()
+                    .filter(calendarDay -> calendarDay.getId().equals(calendarDayDTO.getId()))
+                    .findFirst().orElse(null);
+
+            if (existingDay != null) {
+                // Delete messages
+                List<Message> messagesToDelete = existingDay.getMessages().stream()
+                        .filter(message -> calendarDayDTO.getMessages().stream()
+                                .noneMatch(messageDTO -> messageDTO.getId() != null
+                                        && messageDTO.getId().equals(message.getId())))
+                        .collect(Collectors.toList());
+
+                existingDay.getMessages().removeAll(messagesToDelete);
+                messageRepository.deleteAll(messagesToDelete);
+
+                for (MessageDTO messageDTO : calendarDayDTO.getMessages()) {
+                    if (messageDTO.getId() != null) {
+                        Message existingMessage = existingDay.getMessages().stream()
+                                .filter(message -> message.getId().equals(messageDTO.getId()))
+                                .findFirst().orElse(null);
+
+                        if (existingMessage != null) {
+                            // Update message
+                            if (!existingMessage.getDescription().equals(messageDTO.getDescription())
+                                    || existingMessage.getPrice() != messageDTO.getPrice()
+                                    || existingMessage.isIncome() != messageDTO.getIsIncome()) {
+                                existingMessage.setDescription(messageDTO.getDescription());
+                                existingMessage.setPrice(messageDTO.getPrice());
+                                existingMessage.setIncome(messageDTO.getIsIncome());
+                            }
+                        } else {
+                            throw new EntityNotFoundException("Message not found with id: " + messageDTO.getId());
+                        }
+                    } else {
+                        // Create message
+                        Message newMessage = messageDTO.toEntity(existingDay);
+                        existingDay.getMessages().add(newMessage);
+                    }
+                }
+            } else {
+                CalendarDay newCalendarDay = calendarDayDTO.toEntity(existingUserCalendar);
+                existingUserCalendar.getCalendar().add(newCalendarDay);
+            }
+        }
+        existingUserCalendar.allTotal();
+        userCalendarRepository.save(existingUserCalendar);
+    }
 
 
     public void addToHistory(UserHistoryDTO userHistoryDTO) {
-        User user = userRepository.findById(userHistoryDTO.getId()).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userHistoryDTO.getId()));
+        User user = userRepository.findById(userHistoryDTO.getId()).orElseThrow(
+                () -> new EntityNotFoundException("User not found with id: " + userHistoryDTO.getId()));
         user.getUserHistory().add(userHistoryDTO.toEntity(user));
         userRepository.save(user);
 
@@ -47,7 +104,8 @@ public class UserService {
 
     @Transactional
     public void removeOneHistoryElem(Long userId, Long index) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new EntityNotFoundException("User not found with id: " + userId));
         Long id = user.getUserHistory().get(index.intValue()).getId();
 
         user.getUserHistory().remove(index.intValue());
@@ -79,7 +137,6 @@ public class UserService {
         }
 
     }
-
 
 
     public String saveUserC(User user) {
@@ -196,11 +253,12 @@ public class UserService {
         }
         return code.toString();
     }
+
     //get by email and equals pass
     public User getUser(String email, String password) {
         User user = userRepository.findByEmail(email);
 
-        if (user!=null && password.equals(user.getPassword())) {
+        if (user != null && password.equals(user.getPassword())) {
             return userRepository.findByEmail(email);
         } else return null;
     }
@@ -237,7 +295,5 @@ public class UserService {
         }
         return true;
     }
-
-
 
 }
