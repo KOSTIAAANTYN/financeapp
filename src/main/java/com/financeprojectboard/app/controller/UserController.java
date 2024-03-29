@@ -17,11 +17,9 @@ import java.util.Map;
 public class UserController {
     private final UserService userService;
 
-    @PostMapping("/update-list")
-    public ResponseEntity<?> updateList(@RequestBody UserCalendarDTO userCalendarDTO) {
-        userService.test(userCalendarDTO);
-
-        return ResponseEntity.ok().build();
+    @PostMapping("/updateCalendar")
+    public ResponseEntity<UserCalendarDTO> updateCalendar(@RequestBody UserCalendarDTO userCalendarDTO) {
+        return  ResponseEntity.ok(userService.updateCalendar(userCalendarDTO));
     }
 
 
@@ -46,10 +44,6 @@ public class UserController {
     }
 
 
-    @PostMapping("/updateCalendar")
-    public ResponseEntity<String> updateCalendar(@RequestBody UserCalendarDTO userCalendarDTO) {
-        return userService.updateUserCalendar(userCalendarDTO);
-    }
 
 
     @PostMapping("/sendEmail")

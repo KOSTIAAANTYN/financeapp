@@ -36,9 +36,8 @@ public class UserService {
 
 
     //if no id + message , id + message+changes=update, id_base not found = delete
-    //TODO sync with frontend
     @Transactional
-    public void test(UserCalendarDTO userCalendarDTO) {
+    public UserCalendarDTO updateCalendar(UserCalendarDTO userCalendarDTO) {
         User user = userRepository.findById(userCalendarDTO.getId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userCalendarDTO.getId()));
 
@@ -91,6 +90,7 @@ public class UserService {
         }
         existingUserCalendar.allTotal();
         userCalendarRepository.save(existingUserCalendar);
+        return existingUserCalendar.toDTO();
     }
 
 
@@ -116,26 +116,6 @@ public class UserService {
     @Transactional
     public void clearHistory(Long userId) {
         userHistoryRepository.deleteUserHistoriesByUserId(userId);
-    }
-
-    //TODO Maybe Update Update user calendar
-    public ResponseEntity<String> updateUserCalendar(UserCalendarDTO userCalendarDTO) {
-        if (userRepository.findById(userCalendarDTO.getId()).isPresent()) {
-            User user = userRepository.findById(userCalendarDTO.getId()).get();
-            UserCalendar userCalendar = user.getUserCalendar();
-
-            user.deleteUserCalendar();
-            userCalendarRepository.delete(userCalendar);
-            userRepository.save(user);
-
-            user.setUserCalendar(userCalendarDTO.toEntity(user));
-            userRepository.save(user);
-            return ResponseEntity.ok().body("User calendar updated successfully");
-
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-
     }
 
 

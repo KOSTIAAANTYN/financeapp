@@ -58,7 +58,8 @@ public class UserCalendar {
         calendarDay.setUserCalendar(this);
         calendar.add(calendarDay);
     }
-//TODO commit this
+
+
     public void allTotal() {
         globalTotal = 0;
         weekTotal = 0;
