@@ -25,7 +25,7 @@ public class UserCalendarDTO {
     private List<UserHistoryDTO> userHistory;
 
 
-
+//TODO DTO to Entity?
     public UserCalendar toEntity(User user) {
         UserCalendar userCalendar = new UserCalendar();
 
