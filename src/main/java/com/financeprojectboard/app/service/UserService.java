@@ -35,7 +35,6 @@ public class UserService {
     private final MessageRepository messageRepository;
 
 
-    //if no id + message , id + message+changes=update, id_base not found = delete
     @Transactional
     public UserCalendarDTO updateCalendar(UserCalendarDTO userCalendarDTO) {
         User user = userRepository.findById(userCalendarDTO.getId())
