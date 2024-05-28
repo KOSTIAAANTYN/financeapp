@@ -26,7 +26,7 @@ public class TokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String jwt = null;
-        String username = null;
+        String email = null;
         UserDetails userDetails = null;
         UsernamePasswordAuthenticationToken auth = null;
 
@@ -42,27 +42,26 @@ public class TokenFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                username = jwtCore.getUsernameFromToken(jwt);
+                email = jwtCore.getUsernameFromToken(jwt);
             }
 
         } catch (ExpiredJwtException e) {
             response.setStatus(401);
             return;
         } catch (JwtException e) {
-            System.out.println("JWT Err"+" "+e.getMessage());
+            System.out.println("JWT Err" + " " + e.getMessage());
             response.setStatus(401);
             return;
         } catch (Exception e) {
-            System.out.println("WowErr"+" "+ e.getMessage());
+            System.out.println("WowErr" + " " + e.getMessage());
             response.setStatus(500);
             return;
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            userDetails = userDetailsService.loadUserByUsername(username);
-            auth = new UsernamePasswordAuthenticationToken(userDetails, null);
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            userDetails = userDetailsService.loadUserByUsername(email);
+            auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(auth);
-
         }
 
         filterChain.doFilter(request, response);

@@ -4,9 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.*;
-
-import java.net.Authenticator;
-import java.security.PrivateKey;
 import java.util.Date;
 
 @Component
@@ -41,4 +38,5 @@ public class JwtCore {
         }
     }
 }
+
 
