@@ -6,6 +6,8 @@ import com.financeprojectboard.app.config.UserDetailsImpl;
 import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.repositories.UserRepository;
 import com.financeprojectboard.app.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin("*")
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "auth_methods")
 @RequestMapping("/auth")
 public class SecurityController {
     private final UserService userService;
@@ -26,12 +29,19 @@ public class SecurityController {
     private final AuthenticationManager authenticationManager;
     private final JwtCore jwtCore;
     private final JwtService jwtService;
+    //http://localhost:8080/swagger-ui/index.html#/
 
+    @Operation(
+            summary = "receive user and save him"
+    )
     @PostMapping("/createUser")
     public ResponseEntity<String> createUser(@RequestBody User user) {
         return ResponseEntity.ok(userService.saveUserC(user));
     }
 
+    @Operation(
+            summary = "receive user email, send code to front"
+    )
     @PostMapping("/sendEmail")
     public ResponseEntity<String> sendEmail(@RequestBody User user) {
         //return message or mail code
@@ -78,6 +88,9 @@ public class SecurityController {
 //
 //}
 
+    @Operation(
+            summary = "auth user and give token"
+    )
     @PostMapping("/login")
     @ResponseBody
     public ResponseEntity<?> loginToken(@RequestBody User user) {
@@ -105,6 +118,9 @@ public class SecurityController {
         }
     }
 
+    @Operation(
+            summary = "refresh token by unexpired token"
+    )
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String token) {
         if (token != null && token.startsWith("Bearer ")) {

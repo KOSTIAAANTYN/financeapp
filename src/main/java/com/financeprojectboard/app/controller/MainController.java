@@ -7,6 +7,8 @@ import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.model.UserCalendar;
 import com.financeprojectboard.app.repositories.UserRepository;
 import com.financeprojectboard.app.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,11 +18,15 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "main_methods")
 @RequestMapping("/secured")
 public class MainController {
     private final UserService userService;
     private final UserRepository userRepository;
 
+    @Operation(
+            summary = "gives calendar by token"
+    )
     //give cal by token
     @PostMapping("/loginAndCalendar")
     @ResponseBody
@@ -35,6 +41,10 @@ public class MainController {
         return userCalendar.toDTO();
     }
 
+    @Operation(
+            summary = "receive user and jwt token, then update his calendar",
+            description = "if no id + message , id + message+changes=update, id_base not found = delete"
+    )
     @PostMapping("/updateCalendar")
     public ResponseEntity<?> updateCalendar(@RequestBody UserCalendarDTO userCalendarDTO
             , @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -44,7 +54,10 @@ public class MainController {
         return ResponseEntity.ok(userService.updateCalendar(userCalendarDTO));
     }
 
-
+    @Operation(
+            summary = "receive user history and jwt token, then add him",
+            description = "add to history or throw err User not found with id:"
+    )
     @PostMapping("/addToHistory")
     public ResponseEntity<String> addToHistory(@RequestBody UserHistoryDTO userHistoryDTO
             , @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -55,6 +68,10 @@ public class MainController {
         return ResponseEntity.ok().body("ok");
     }
 
+    @Operation(
+            summary = "receive user id, index of history in list,and jwt token, then delete him",
+            description = "remove history by user id and index or throw err User not found with id:"
+    )
     @PostMapping("/removeOneHistoryElem")
     public ResponseEntity<String> removeOneHistoryElem(@RequestBody Map<String, Long> requestBody
             , @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -67,6 +84,10 @@ public class MainController {
         return ResponseEntity.ok().body("ok");
     }
 
+    @Operation(
+            summary = "receive user id, index of history in list and jwt token, then delete him",
+            description = "remove history by user id and index or throw err User not found with id:"
+    )
     @PostMapping("/clearHistory")
     public ResponseEntity<String> clearHistory(@RequestBody Map<String, Long> requestBody
             , @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -78,8 +99,9 @@ public class MainController {
         return ResponseEntity.ok().body("ok");
     }
 
-    //<<<pass+email
-    //email-code>>>front
+    @Operation(
+            summary = "<<<pass+email+token/email-code>>>front"
+    )
     @PostMapping("/changePassword")
     public ResponseEntity<String> changePassword(@RequestBody User user
             , @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -93,6 +115,9 @@ public class MainController {
         }
     }
 
+    @Operation(
+            summary = "saved changed pass"
+    )
     //saved changed pass
     @PostMapping("/savePassword")
     public ResponseEntity<String> savePassword(@RequestBody User user
@@ -103,6 +128,10 @@ public class MainController {
         return ResponseEntity.ok(userService.savePass(user));
     }
 
+    @Operation(
+            summary = "change name",
+            description = "200ok 400bad"
+    )
     //200ok 400bad
     @PostMapping("/changeName")
     public ResponseEntity<String> changeName(@RequestBody User user
@@ -117,6 +146,9 @@ public class MainController {
         }
     }
 
+    @Operation(
+            summary = "delete account"
+    )
     @PostMapping("/deleteAccount")
     public ResponseEntity<String> deleteAccount(@RequestBody User user
             ,@AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -128,6 +160,9 @@ public class MainController {
         } else return ResponseEntity.status(400).body("bad");
     }
 
+    @Operation(
+            summary = "contact with devs by email"
+    )
     @PostMapping("/contact")
     public ResponseEntity<String> contactUs(@RequestBody Map<String, String> requestBody
             ,@AuthenticationPrincipal UserDetailsImpl userDetails) {

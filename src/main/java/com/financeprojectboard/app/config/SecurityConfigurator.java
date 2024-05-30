@@ -58,11 +58,13 @@ public class SecurityConfigurator {
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/secured/**").permitAll()
-//                        .fullyAuthenticated().anyRequest()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**").permitAll()
+                        .requestMatchers("/secured/**").authenticated()
+                        .anyRequest().permitAll()
                 )
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
-                return http.build();
+
+        return http.build();
     }
 
 }
