@@ -38,7 +38,6 @@ public class UserCalendar {
 
         dto.setEmail(this.user.getEmail());
         dto.setUsername(this.user.getUsername());
-        dto.setPassword(this.user.getPassword());
 
         List<CalendarDayDTO> calendarDTOList = this.calendar.stream()
                 .map(CalendarDay::toDTO)

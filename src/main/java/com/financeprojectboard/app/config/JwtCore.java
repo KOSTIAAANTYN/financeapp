@@ -22,8 +22,14 @@ public class JwtCore {
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
+    public String generateToken(UserDetailsImpl userDetails) {
+        return Jwts.builder().setSubject(userDetails.getEmail()).setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + lifetime))
+                .signWith(SignatureAlgorithm.HS256, secret)
+                .compact();
+    }
 
-    public String getUsernameFromToken(String token) {
+    public String getEmailFromToken(String token) {
         return Jwts.parser().setSigningKey(secret).build().parseClaimsJws(token).getBody().getSubject();
     }
 

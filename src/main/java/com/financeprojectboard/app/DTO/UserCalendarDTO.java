@@ -19,29 +19,9 @@ public class UserCalendarDTO {
 
     private String username;
     private String email;
-    private String password;
+
 
     private List<CalendarDayDTO> calendar;
     private List<UserHistoryDTO> userHistory;
-
-
-    public UserCalendar toEntity(User user) {
-        UserCalendar userCalendar = new UserCalendar();
-
-        userCalendar.setGlobalTotal(this.globalTotal);
-        userCalendar.setWeekTotal(this.weekTotal);
-
-        userCalendar.setUser(user);
-
-        if (this.calendar != null) {
-            List<CalendarDay> calendarDays = this.calendar.stream()
-                    .map(calendarDayDTO -> calendarDayDTO.toEntity(userCalendar))
-                    .collect(Collectors.toList());
-            userCalendar.setCalendar(calendarDays);
-            userCalendar.allTotal();
-        }
-
-        return userCalendar;
-    }
 
 }

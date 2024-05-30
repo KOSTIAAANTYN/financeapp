@@ -11,9 +11,9 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +33,7 @@ public class UserService {
     private final UserHistoryRepository userHistoryRepository;
     private final JavaMailSender mailSender;
     private final MessageRepository messageRepository;
+    private final PasswordEncoder passwordEncoder;
 
 
     //if no id + message , id + message+changes=update, id_base not found = delete
@@ -120,7 +121,7 @@ public class UserService {
 
 
     public String saveUserC(User user) {
-        User user1 = new User(user.getUsername(), user.getEmail(), user.getPassword());
+        User user1 = new User(user.getUsername(), user.getEmail(), passwordEncoder.encode(user.getPassword()));
         userRepository.save(user1);
         return "ok";
     }
@@ -171,7 +172,7 @@ public class UserService {
 
 
     public String savePass(User user) {
-        if (isExist(user.getEmail())) {
+        if (userRepository.existsByEmail(user.getEmail())) {
             User oldUser = userRepository.findByEmail(user.getEmail());
             oldUser.setPassword(user.getPassword());
             userRepository.save(oldUser);
@@ -179,11 +180,6 @@ public class UserService {
         } else {
             return "User doesn't exist";
         }
-    }
-
-
-    public boolean isExist(String email) {
-        return userRepository.findByEmail(email) != null;
     }
 
 
@@ -234,14 +230,6 @@ public class UserService {
         return code.toString();
     }
 
-    //get by email and equals pass
-    public User getUser(String email, String password) {
-        User user = userRepository.findByEmail(email);
-
-        if (user != null && password.equals(user.getPassword())) {
-            return userRepository.findByEmail(email);
-        } else return null;
-    }
 
     public boolean changeName(Long id, String username) {
         if (userRepository.findById(id).isPresent()) {
