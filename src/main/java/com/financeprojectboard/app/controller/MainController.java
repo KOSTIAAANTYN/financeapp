@@ -26,7 +26,6 @@ import java.util.Map;
 public class MainController {
     private final UserService userService;
     private final UserRepository userRepository;
-    private final JwtCore jwtCore;
 
     @Operation(
             summary = "gives calendar by token"
@@ -34,29 +33,15 @@ public class MainController {
     //give cal by token
     @PostMapping("/loginAndCalendar")
     @ResponseBody
-    public ResponseEntity<Object> loginAndCalendar(@RequestHeader("Authorization") String token) {
-        ResponseEntity<Object> tokenCheckResult = checkToken(token);
-        if (tokenCheckResult != null) {
-            return tokenCheckResult;
+    public Object loginAndCalendar(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
         }
-
-        User user = userRepository.findByEmail(jwtCore.getEmailFromToken(token.substring(7)));
+        User user = userRepository.findByEmail(userDetails.getEmail());
         UserCalendar userCalendar = user.getUserCalendar();
         userService.checkLongLogin(user);
-        return ResponseEntity.ok(userCalendar.toDTO());
-    }
 
-    private ResponseEntity<Object> checkToken(String token) {
-        if (token != null && token.startsWith("Bearer ")) {
-            String accessToken = token.substring(7);
-            if ("access".equals(jwtCore.getTokenType(accessToken))) {
-                return null;
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token type");
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token not provided");
-        }
+        return userCalendar.toDTO();
     }
 
     @Operation(
@@ -65,10 +50,9 @@ public class MainController {
     )
     @PostMapping("/updateCalendar")
     public ResponseEntity<?> updateCalendar(@RequestBody UserCalendarDTO userCalendarDTO
-            , @RequestHeader("Authorization") String token) {
-        ResponseEntity<Object> tokenCheckResult = checkToken(token);
-        if (tokenCheckResult != null) {
-            return tokenCheckResult;
+            , @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
         }
         return ResponseEntity.ok(userService.updateCalendar(userCalendarDTO));
     }
@@ -78,11 +62,10 @@ public class MainController {
             description = "add to history or throw err User not found with id:"
     )
     @PostMapping("/addToHistory")
-    public ResponseEntity<?> addToHistory(@RequestBody UserHistoryDTO userHistoryDTO
-            , @RequestHeader("Authorization") String token) {
-        ResponseEntity<Object> tokenCheckResult = checkToken(token);
-        if (tokenCheckResult != null) {
-            return tokenCheckResult;
+    public ResponseEntity<String> addToHistory(@RequestBody UserHistoryDTO userHistoryDTO
+            , @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
         }
         userService.addToHistory(userHistoryDTO);
         return ResponseEntity.ok().body("ok");
@@ -93,11 +76,10 @@ public class MainController {
             description = "remove history by user id and index or throw err User not found with id:"
     )
     @PostMapping("/removeOneHistoryElem")
-    public ResponseEntity<?> removeOneHistoryElem(@RequestBody Map<String, Long> requestBody
-            , @RequestHeader("Authorization") String token) {
-        ResponseEntity<Object> tokenCheckResult = checkToken(token);
-        if (tokenCheckResult != null) {
-            return tokenCheckResult;
+    public ResponseEntity<String> removeOneHistoryElem(@RequestBody Map<String, Long> requestBody
+            , @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
         }
         Long userId = requestBody.get("userId");
         Long index = requestBody.get("index");
@@ -110,11 +92,10 @@ public class MainController {
             description = "remove history by user id and index or throw err User not found with id:"
     )
     @PostMapping("/clearHistory")
-    public ResponseEntity<?> clearHistory(@RequestBody Map<String, Long> requestBody
-            , @RequestHeader("Authorization") String token) {
-        ResponseEntity<Object> tokenCheckResult = checkToken(token);
-        if (tokenCheckResult != null) {
-            return tokenCheckResult;
+    public ResponseEntity<String> clearHistory(@RequestBody Map<String, Long> requestBody
+            , @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
         }
         Long userId = requestBody.get("userId");
         userService.clearHistory(userId);
@@ -125,11 +106,10 @@ public class MainController {
             summary = "<<<pass+email+token/email-code>>>front"
     )
     @PostMapping("/changePassword")
-    public ResponseEntity<?> changePassword(@RequestBody User user
-            , @RequestHeader("Authorization") String token) {
-        ResponseEntity<Object> tokenCheckResult = checkToken(token);
-        if (tokenCheckResult != null) {
-            return tokenCheckResult;
+    public ResponseEntity<String> changePassword(@RequestBody User user
+            , @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
         }
         if (userRepository.existsByEmail(user.getEmail())) {
             return ResponseEntity.ok(userService.emailAuth(user.getEmail()));
@@ -143,11 +123,10 @@ public class MainController {
     )
     //saved changed pass
     @PostMapping("/savePassword")
-    public ResponseEntity<?> savePassword(@RequestBody User user
-            ,@RequestHeader("Authorization") String token) {
-        ResponseEntity<Object> tokenCheckResult = checkToken(token);
-        if (tokenCheckResult != null) {
-            return tokenCheckResult;
+    public ResponseEntity<String> savePassword(@RequestBody User user
+            , @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
         }
         return ResponseEntity.ok(userService.savePass(user));
     }
@@ -158,11 +137,10 @@ public class MainController {
     )
     //200ok 400bad
     @PostMapping("/changeName")
-    public ResponseEntity<?> changeName(@RequestBody User user
-            ,@RequestHeader("Authorization") String token) {
-        ResponseEntity<Object> tokenCheckResult = checkToken(token);
-        if (tokenCheckResult != null) {
-            return tokenCheckResult;
+    public ResponseEntity<String> changeName(@RequestBody User user
+            , @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
         }
         if (userService.changeName(user.getId(), user.getUsername())) {
             return ResponseEntity.ok().body("ok");
@@ -175,11 +153,10 @@ public class MainController {
             summary = "delete account"
     )
     @PostMapping("/deleteAccount")
-    public ResponseEntity<?> deleteAccount(@RequestBody User user
-            ,@RequestHeader("Authorization") String token) {
-        ResponseEntity<Object> tokenCheckResult = checkToken(token);
-        if (tokenCheckResult != null) {
-            return tokenCheckResult;
+    public ResponseEntity<String> deleteAccount(@RequestBody User user
+            , @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
         }
         if (userService.delUser(user.getId())) {
             return ResponseEntity.ok().body("User deleted");
@@ -190,11 +167,10 @@ public class MainController {
             summary = "contact with devs by email"
     )
     @PostMapping("/contact")
-    public ResponseEntity<?> contactUs(@RequestBody Map<String, String> requestBody
-            ,@RequestHeader("Authorization") String token) {
-        ResponseEntity<Object> tokenCheckResult = checkToken(token);
-        if (tokenCheckResult != null) {
-            return tokenCheckResult;
+    public ResponseEntity<String> contactUs(@RequestBody Map<String, String> requestBody
+            , @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
         }
         String email = requestBody.get("email");
         String question = requestBody.get("question");

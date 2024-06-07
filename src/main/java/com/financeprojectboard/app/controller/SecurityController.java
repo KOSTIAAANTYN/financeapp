@@ -27,7 +27,6 @@ public class SecurityController {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtCore jwtCore;
-    private final JwtService jwtService;
     //http://localhost:8080/swagger-ui/index.html#/
 
     @Operation(
@@ -52,39 +51,9 @@ public class SecurityController {
     }
 
     @Operation(
-            summary = "auth user and give token"
-    )
-    @PostMapping("/login")
-    @ResponseBody
-    public ResponseEntity<?> loginToken(@RequestBody User user) {
-        //return message or find user
-        //email,pass
-        if (user != null && userRepository.existsByEmail(user.getEmail())) {
-            try {
-
-                Authentication authentication = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
-                Authentication authenticatedUser = authenticationManager.authenticate(authentication);
-                SecurityContextHolder.getContext().setAuthentication(authenticatedUser);
-                String jwt = jwtCore.generateAccessToken(authenticatedUser);
-                return ResponseEntity.ok(jwt);
-
-            } catch (BadCredentialsException e) {
-                System.out.println("Bad credentials provided");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
-            } catch (Exception e) {
-                System.out.println("Unexpected error during authentication: " + e.getMessage());
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
-        } else {
-            return ResponseEntity.status(404).body("user");
-        }
-    }
-
-    @Operation(
             summary = "auth user and give tokens"
     )
-    @PostMapping("/login2")
+    @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody User user) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
