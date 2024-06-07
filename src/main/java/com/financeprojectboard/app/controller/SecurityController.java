@@ -2,7 +2,6 @@ package com.financeprojectboard.app.controller;
 
 import com.financeprojectboard.app.config.JwtCore;
 import com.financeprojectboard.app.config.JwtService;
-import com.financeprojectboard.app.config.UserDetailsImpl;
 import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.repositories.UserRepository;
 import com.financeprojectboard.app.service.UserService;
@@ -52,42 +51,6 @@ public class SecurityController {
         }
     }
 
-//gen jwt and sent him with cal
-//    @PostMapping("/login")
-//    @ResponseBody
-//    public Object login(@RequestBody User user) {
-//        //return message or find user
-//        //email,pass
-//        if (user != null && userRepository.existsByEmail(user.getEmail())) {
-//            try {
-//
-//                Authentication authentication = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
-//                Authentication authenticatedUser = authenticationManager.authenticate(authentication);
-//                SecurityContextHolder.getContext().setAuthentication(authenticatedUser);
-//                String jwt = jwtCore.generateToken(authenticatedUser);
-//
-//                User user1 = userRepository.findByEmail(user.getEmail());
-//                UserCalendar userCalendar = user1.getUserCalendar();
-//                userService.checkLongLogin(user1);
-//                UserCalendarDTO userCalendarDTO = userCalendar.toDTO();
-//
-//                return ResponseEntity.ok(userCalendarDTO + " " + jwt);
-//
-//            } catch (BadCredentialsException e) {
-//                System.out.println("Bad credentials provided");
-//                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-//
-//            } catch (Exception e) {
-//                System.out.println("Unexpected error during authentication: " + e.getMessage());
-//                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//            }
-//        } else {
-//            return ResponseEntity.status(404).body("user");
-//        }
-//    }
-//
-//}
-
     @Operation(
             summary = "auth user and give token"
     )
@@ -102,7 +65,7 @@ public class SecurityController {
                 Authentication authentication = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
                 Authentication authenticatedUser = authenticationManager.authenticate(authentication);
                 SecurityContextHolder.getContext().setAuthentication(authenticatedUser);
-                String jwt = jwtCore.generateToken(authenticatedUser);
+                String jwt = jwtCore.generateAccessToken(authenticatedUser);
                 return ResponseEntity.ok(jwt);
 
             } catch (BadCredentialsException e) {
@@ -119,23 +82,31 @@ public class SecurityController {
     }
 
     @Operation(
-            summary = "refresh token by unexpired token"
+            summary = "auth user and give tokens"
     )
-    @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String token) {
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
+    @PostMapping("/login2")
+    public ResponseEntity<?> authenticateUser(@RequestBody User user) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtCore.generateAccessToken(authentication);
+        String refreshToken = jwtCore.generateRefreshToken(authentication);
+        return ResponseEntity.ok(jwt + ";" + refreshToken);
+    }
+
+    @Operation(
+            summary = "refresh access token by refresh token"
+    )
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refToken) {
+        if (refToken != null && refToken.startsWith("Bearer ")) {
+            refToken = refToken.substring(7);
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");
         }
-        try {
-            String email = jwtCore.getEmailFromToken(token);
-            UserDetailsImpl userDetails = (UserDetailsImpl) jwtService.loadUserByUsername(email);
-            String newToken = jwtCore.generateToken(userDetails);
-
-            return ResponseEntity.ok(newToken);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-        }
+        String newToken = jwtCore.refreshAccessToken(refToken);
+        return ResponseEntity.ok(newToken + ";" + refToken);
     }
 }
+

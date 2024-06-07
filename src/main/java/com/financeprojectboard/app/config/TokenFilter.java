@@ -23,7 +23,8 @@ public class TokenFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         String jwt = null;
         String email = null;
         UserDetails userDetails = null;
@@ -66,3 +67,4 @@ public class TokenFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
+
