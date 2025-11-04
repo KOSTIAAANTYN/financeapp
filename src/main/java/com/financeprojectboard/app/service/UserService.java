@@ -4,23 +4,30 @@ import com.financeprojectboard.app.DTO.CalendarDayDTO;
 import com.financeprojectboard.app.DTO.MessageDTO;
 import com.financeprojectboard.app.DTO.UserCalendarDTO;
 import com.financeprojectboard.app.DTO.UserHistoryDTO;
-import com.financeprojectboard.app.model.*;
+import com.financeprojectboard.app.model.CalendarDay;
+import com.financeprojectboard.app.model.Message;
+import com.financeprojectboard.app.model.User;
+import com.financeprojectboard.app.model.UserCalendar;
 import com.financeprojectboard.app.repositories.*;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.*;
+import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -120,8 +127,8 @@ public class UserService {
     }
 
 
-    public String saveUserC(User user) {
-        User user1 = new User(user.getUsername(), user.getEmail(), passwordEncoder.encode(user.getPassword()));
+    public String saveUserC(String email,String username,String password) {
+        User user1 = new User(username,email,password);
         userRepository.save(user1);
         return "ok";
     }
@@ -265,3 +272,4 @@ public class UserService {
     }
 
 }
+

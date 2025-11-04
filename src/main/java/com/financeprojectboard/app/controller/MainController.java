@@ -3,11 +3,11 @@ package com.financeprojectboard.app.controller;
 import com.financeprojectboard.app.DTO.UserCalendarDTO;
 import com.financeprojectboard.app.DTO.UserHistoryDTO;
 import com.financeprojectboard.app.config.JwtCore;
+import com.financeprojectboard.app.service.UserService;
 import com.financeprojectboard.app.config.UserDetailsImpl;
 import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.model.UserCalendar;
 import com.financeprojectboard.app.repositories.UserRepository;
-import com.financeprojectboard.app.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +24,8 @@ import java.util.Map;
 @Tag(name = "main_methods")
 @RequestMapping("/secured")
 public class MainController {
-    private final UserService userService;
     private final UserRepository userRepository;
+    private final UserService userService;
 
     @Operation(
             summary = "gives calendar by token"
@@ -103,35 +103,6 @@ public class MainController {
     }
 
     @Operation(
-            summary = "<<<pass+email+token/email-code>>>front"
-    )
-    @PostMapping("/changePassword")
-    public ResponseEntity<String> changePassword(@RequestBody User user
-            , @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(401).build();
-        }
-        if (userRepository.existsByEmail(user.getEmail())) {
-            return ResponseEntity.ok(userService.emailAuth(user.getEmail()));
-        } else {
-            return ResponseEntity.status(404).body("User doesn't exist");
-        }
-    }
-
-    @Operation(
-            summary = "saved changed pass"
-    )
-    //saved changed pass
-    @PostMapping("/savePassword")
-    public ResponseEntity<String> savePassword(@RequestBody User user
-            , @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(401).build();
-        }
-        return ResponseEntity.ok(userService.savePass(user));
-    }
-
-    @Operation(
             summary = "change name",
             description = "200ok 400bad"
     )
@@ -174,7 +145,8 @@ public class MainController {
         }
         String email = requestBody.get("email");
         String question = requestBody.get("question");
-        if (email != null && question != null && userService.contactUs(email, question)) {
+        if (email != null && question != null ) {
+            userService.contactUs(email, question);
             return ResponseEntity.ok().body("");
         } else return ResponseEntity.status(400).body("");
     }
