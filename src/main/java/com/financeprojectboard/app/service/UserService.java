@@ -15,6 +15,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -40,7 +41,10 @@ public class UserService {
     private final UserHistoryRepository userHistoryRepository;
     private final JavaMailSender mailSender;
     private final MessageRepository messageRepository;
-    private final PasswordEncoder passwordEncoder;
+    @Value("${dev.name}")
+    private String devEmail;
+    @Value("${spring.mail.username}")
+    private String financeEmail;
 
 
     //if no id + message , id + message+changes=update, id_base not found = delete
@@ -258,8 +262,8 @@ public class UserService {
         MimeMessage message = mailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom("financeprojectboard@gmail.com");
-            helper.setTo("ichkostya@gmail.com");//another Dev (maybe)
+            helper.setFrom(financeEmail);
+            helper.setTo(devEmail);
             helper.setText(question);
             helper.setSubject(email);
 
