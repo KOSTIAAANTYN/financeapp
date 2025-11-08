@@ -9,6 +9,10 @@ import com.financeprojectboard.app.model.Message;
 import com.financeprojectboard.app.model.User;
 import com.financeprojectboard.app.model.UserCalendar;
 import com.financeprojectboard.app.repositories.*;
+import com.resend.Resend;
+import com.resend.core.exception.ResendException;
+import com.resend.services.emails.model.CreateEmailOptions;
+import com.resend.services.emails.model.CreateEmailResponse;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
@@ -45,6 +49,8 @@ public class UserService {
     private String devEmail;
     @Value("${spring.mail.username}")
     private String financeEmail;
+    @Value("${resendApiKey}")
+    private String resendApiKey;
 
 
     //if no id + message , id + message+changes=update, id_base not found = delete
@@ -196,28 +202,25 @@ public class UserService {
 
     public String emailAuth(String email) {
         String code = generateRandomCode();
-        MimeMessage message = mailSender.createMimeMessage();
+        Resend resend = new Resend(resendApiKey);
+
         try {
-            MimeMessageHelper helper = new MimeMessageHelper(message,
-                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
-
-            helper.setFrom("financeprojectboard@gmail.com");
-            helper.setTo(email);
-            helper.setSubject("Your code for finance app");
-
-
             ClassPathResource resource = new ClassPathResource("templates/codeMail.html");
             byte[] fileData = resource.getInputStream().readAllBytes();
             String htmlContent = new String(fileData, StandardCharsets.UTF_8);
-
             htmlContent = htmlContent.replace("<!-- GENERATED_CODE_PLACEHOLDER -->", code);
 
-            helper.setText(htmlContent, true);
+            CreateEmailOptions params = CreateEmailOptions.builder()
+                    .from(financeEmail)
+                    .to(email)
+                    .subject("Your code for finance app")
+                    .html(htmlContent)
+                    .build();
 
-            mailSender.send(message);
+            CreateEmailResponse response = resend.emails().send(params);
+            System.out.println("Email sent with ID: " + response.getId());
 
-
-        } catch (MessagingException | IOException e) {
+        } catch (IOException | ResendException e) {
             System.err.println("Failed to send email: " + e.getMessage());
         }
 
@@ -259,20 +262,24 @@ public class UserService {
     }
 
     public boolean contactUs(String email, String question) {
-        MimeMessage message = mailSender.createMimeMessage();
-        try {
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(financeEmail);
-            helper.setTo(devEmail);
-            helper.setText(question);
-            helper.setSubject(email);
+        Resend resend = new Resend(resendApiKey);
 
-            mailSender.send(message);
-        } catch (MessagingException e) {
+        try {
+            CreateEmailOptions params = CreateEmailOptions.builder()
+                    .from(financeEmail)
+                    .to(devEmail)
+                    .subject("Message from: " + email)
+                    .text(question)
+                    .build();
+
+            CreateEmailResponse response = resend.emails().send(params);
+            System.out.println("Contact email sent with ID: " + response.getId());
+            return true;
+
+        } catch (ResendException e) {
             System.err.println("Failed to send email: " + e.getMessage());
             return false;
         }
-        return true;
     }
 
 }
