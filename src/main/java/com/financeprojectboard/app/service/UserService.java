@@ -44,6 +44,7 @@ public class UserService {
     private final CalendarDayRepository calendarDayRepository;
     private final UserHistoryRepository userHistoryRepository;
     private final JavaMailSender mailSender;
+    private final PasswordEncoder passwordEncoder;
     private final MessageRepository messageRepository;
     @Value("${dev.name}")
     private String devEmail;
@@ -191,7 +192,7 @@ public class UserService {
     public String savePass(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             User oldUser = userRepository.findByEmail(user.getEmail());
-            oldUser.setPassword(user.getPassword());
+            oldUser.setPassword(passwordEncoder.encode(user.getPassword()));
             userRepository.save(oldUser);
             return "Password saved";
         } else {
